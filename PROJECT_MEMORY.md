@@ -1,32 +1,45 @@
 # Project Memory — Đồ án Tái dựng 3D & Thuật toán DCA (`c:\doan`)
 
-**Cập nhật lần cuối:** 2026-11-17
+**Cập nhật lần cuối:** 2026-11-17 (Hoàn tất Pha 0 & Pha 1 — Sẵn sàng cho Pha 2)
 
 ---
 
 ## 1. Thông tin chung & Mục tiêu dự án
-- **Mục tiêu của người dùng:** Nghiên cứu thuật toán **DCA** của thầy hướng dẫn và áp dụng vào mã nguồn để xây dựng **bản đồ/mô hình 3D cho một lon bò húc**.
+- **Mục tiêu của người dùng:** Nghiên cứu thuật toán **DCA** của thầy hướng dẫn và áp dụng vào mã nguồn để xây dựng **bản đồ/mô hình 3D hoàn chỉnh** (mục tiêu cuối: **lon bò húc**; bộ dữ liệu thực nghiệm đang có sẵn: **12 ảnh 360° con gà đèn ngủ** tại `c:\doan\data\ga_den_ngu`).
 - **Giao tiếp & quy ước làm việc:**
   - Người dùng yêu cầu **báo cáo tiến độ `%` thường xuyên** theo từng mốc khi thực hiện các tác vụ nhiều bước.
   - Tài liệu học tập trực quan đã tạo cho người dùng: `c:\doan\huong_dan_3d_dca.html` (và bản artifact tương ứng).
-  - Kế hoạch triển khai đã chốt: `c:\doan\KE_HOACH_DCA_3D_BO_HUC.md`.
+  - Kế hoạch triển khai 5 Pha: `c:\doan\KE_HOACH_DCA_3D_BO_HUC.md`.
 
 ---
 
-## 2. Trạng thái Codebase hiện tại (`c:\doan\reconstruction_generic_code_20261114 (1)`)
-- **Toàn bộ file code `.py` hiện còn nguyên bản (chưa chỉnh sửa).**
-- **Bản chất code gốc:**
-  - Đây là gói phân tích lỗi (`failure-analysis`) tái dựng lưới 3D tổng quát từ ảnh 2D (xuất phát từ Icosphere 42 $\rightarrow$ 162 đỉnh / 320 tam giác), chạy trên **CPU**.
-  - **CẢNH BÁO QUAN TRỌNG:** Code gốc **KHÔNG PHẢI** thuật toán DCA (`START_HERE.txt`, `README_CONTACT.txt`, `LBFGS_CHECK_SPEC.txt` đều ghi rõ *"This is NOT a DCA implementation"*). Bộ giải hiện tại trong `code/reconstruction/optimizer.py` là **Adam-preconditioned Armijo descent + IPC CCD**, và bản đối chứng trong `lbfgs.py` là **L-BFGS-B**.
+## 2. Trạng thái Codebase & Dữ liệu hiện tại
+- **Thư mục mã nguồn đã chuẩn hóa:** `c:\doan\reconstruction_dca_3d` (đã `git mv` từ `reconstruction_generic_code_20261114 (1)`, hiện chưa `git commit`).
+- **Code đã nâng cấp ở Pha 1 (vẫn giữ nguyên mặc định `--optimizer adam` và tương thích 100% với 5/5 test gốc):**
+  - Thêm mới: `code/reconstruction/dca.py`, `code/run_dca_study.py`.
+  - Đã cập nhật: `code/reconstruction/point_terms.py`, `losses.py`, `engine.py`, `contact.py` (`hessian_data`), `axis_completion.py`, `completion.py`, `hidden_completion.py`, `code/reconstruct_images.py` (`--optimizer dca`, `--cauchy-scales`).
+- **Thư mục kết quả thực nghiệm đã lưu (`c:\doan\outputs\`):**
+  - `baseline_raw_inputs/` (Baseline 1 Adam trên `raw_inputs/`)
+  - `baseline_chicken_3views/` (Baseline 2 Adam trên 3 ảnh mặt trước con gà)
+  - `dca_study/` (đối chứng `dca_study.json` + ảnh so sánh `Adam vs L-BFGS-B vs Joint DCA` sạch & bơm 25% outlier)
+  - `dca_chicken_3views/` (`Joint DCA + Homotopy` trên 3 ảnh mặt trước con gà)
+- **Môi trường Python đã dựng xong (Pha 0):**
+  - Virtualenv: `c:\doan\.venv` (Python `3.12.13` qua `uv`).
+  - Đã cài đủ 15 gói theo `code/requirements-reconstruction.txt`: `numpy==2.5.4`, `scipy==1.18.1`, `pillow==13.0.0`, `matplotlib==3.11.2`, `opencv-python-headless==4.10.0.84`, `ipctk==1.6.1`, `libigl==2.6.3`.
+  - **5/5 bộ test gốc PASS:** `check_point_uncertainty.py` (`4.34e-14`), `check_smooth_fields.py` (`1.72e-10`), `check_contact.py` (`2.26e-09`), `check_contact_integration.py` (`2.09e-11`), `check_hidden_completion.py`.
+- **Bộ dữ liệu đầu vào con gà đèn ngủ (`c:\doan\data\ga_den_ngu`):**
+  - 12 ảnh + 12 mask `512×512` (cắt khung vuông đồng nhất `656×656`, căn tâm, tách nền tự động bằng `RMBG-1.4 + GrabCut` trên GPU RTX 3050).
+  - SIFT trên `images/` tại `384px`: mặt trước ghép được (`1↔2`: 8 inliers, `1↔3`: 9 inliers, `2↔3`: 17 inliers, `4↔5`: 9 inliers); mặt lưng/hông trơn (`5..12`) chỉ đạt `0–7` inliers/cặp (`17–39` keypoints/ảnh).
+- **Kết quả Baseline Pha 0 (`Adam-Armijo` + `L2 squared point loss`, chưa có DCA):**
+  1. **Baseline 1 (`c:\doan\outputs\baseline_raw_inputs`, `raw_inputs/` 2 ảnh, `211.9s`):**
+     - `56` tracks / `112` obs; Mask IoU: `96.89%`, `97.84%`; SIFT RMS: `1.433 px` (median `0.255 px`); `0` self-intersections (`libigl`); `0` visibility violations. Góc sau `90°/180°/270°` vẫn lồi lõm.
+  2. **Baseline 2 (`c:\doan\outputs\baseline_chicken_3views`, `ga_den_ngu` 3 ảnh mặt trước `view_01..03`, `184.7s`):**
+     - `10` tracks / `27` obs; Mask IoU tụt còn `75.58% / 82.34% / 81.27%`; SIFT RMS vọt lên `25.543 px` (`max=100.49 px`), `8` visibility violations, `55` contact pairs, `signed_to_hull_volume_ratio=0.131`, lưới bị xé thành gai nhọn (vẫn giữ `0` self-intersections nhờ IPC).
+     - **Nguyên nhân đã xác định rõ:** Có 2 track outlier nặng (`track 9`: ghép nhầm mào ở ảnh 1 sang cánh trái ở ảnh 3, sai số `100.49 px`; `track 8`: ghép nhầm chân phải sang chân trái, sai số `50.54 px`). Do code gốc dùng bình phương L2 thuần (chưa có **Cauchy Robust Loss** của DCA), 2 outlier này phá hỏng hoàn toàn việc chọn giả thuyết camera (`centred_crop_focal_x2`) và kéo méo lưới!
 - **Điểm mạnh giữ lại từ code gốc:**
   - Cập nhật xoay camera trên bản đồ chuẩn đại số Lie $g \leftarrow \exp([\omega]_\times) g$ (`engine.py`, `rotations.py`).
   - Ràng buộc tầm nhìn chạm mặt đầu (`viscost` / First-hit visibility trong `losses.py`).
   - Chống tự cắt lưới 3 lớp bằng `ipctk` (Barrier + CCD `safe_fraction`) và `libigl` (`find_self_intersections`) trong `contact.py`.
-- **Giới hạn của code gốc đối với bài toán lon bò húc:**
-  1. `inputs.py` (`feature_pairs`) chỉ ghép SIFT giữa `view 0` với các ảnh khác $\rightarrow$ không ghép được ảnh vòng tròn 360° mặt sau.
-  2. Chỉ có 2 ảnh $\rightarrow$ ~106/162 đỉnh ở vùng khuất bị phồng/lõm (`result.json` mẫu lon đạt Mask IoU 98.93% & 98.82%, SIFT RMS 0.304 px, nhưng mặt sau vẫn móp).
-  3. Lưới 162 đỉnh quá thô; `geometry.py` (`export_mesh`) chỉ xuất lưới đơn sắc, **không có màu/texture** và **không có kích thước thật** (`metric_scale_known: False`).
-  4. `losses.py` (`silhouette_terms`) broadcast `K × M × T`, và `contact.py:20` khóa `ipctk.set_num_threads(1)`.
 
 ---
 
@@ -50,19 +63,25 @@
 - **GPU:** NVIDIA GeForce RTX 3050 6GB Laptop (`6144 MiB` VRAM). Thuật toán chạy trên CPU; GPU chỉ dùng nếu cần chạy thêm AI tách mask ngoài.
 - **Ổ cứng:** `C:` trống `93.4 GB`, `D:` `23.6 GB`, `E:` `27.3 GB`.
 - **Python hiện có:**
-  - `uv.exe` đã cài tại `C:\Users\viet cong\.local\bin\uv.exe`.
-  - Python `3.12.13` (trùng phiên bản chuẩn của `requirements-reconstruction.txt`) đã có tại `C:\Users\viet cong\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\python.exe`, nhưng **chưa cài thư viện** (`numpy`, `scipy`, `PIL`, `matplotlib`, `cv2`, `ipctk`, `igl` đều `False`).
-  - Python `3.11.9` mặc định có `numpy`, `scipy`, `PIL`, `matplotlib`, `cv2`, nhưng thiếu `ipctk` và `igl`.
+  - `uv.exe` (`0.12.2`) đã cài tại `C:\Users\viet cong\.local\bin\uv.exe`.
+  - Môi trường chạy chính của dự án: `c:\doan\.venv` (Python `3.12.13` với đủ 15 gói chuẩn từ `requirements-reconstruction.txt`).
+  - Python `3.11.9` hệ thống có `torch 2.5.1+cu121`, `transformers`, `cv2`, `onnxruntime` (dùng cho bước tiền xử lý `RMBG-1.4` trên GPU).
 
 ---
 
-## 5. Quyết định & Bước tiếp theo khi mở phiên mới
-- **Kế hoạch đã chốt (5 Pha trong `c:\doan\KE_HOACH_DCA_3D_BO_HUC.md`):**
-  - **Pha 0:** Đổi tên thư mục (nếu người dùng đồng ý), tạo `.venv` Python 3.12 qua `uv`, cài `requirements-reconstruction.txt`, chạy `check_*.py` & baseline `reconstruct_images.py`.
-  - **Pha 1:** Cài đặt `dca.py` (Joint DCA + Cauchy IRLS + Homotopy + giữ CCD) và chạy đối chứng với Adam / L-BFGS-B.
-  - **Pha 2:** Nâng cấp ghép SIFT vòng tròn 360° & khởi tạo đa góc nhìn cho 8–12 ảnh lon bò húc.
-  - **Pha 3:** Subdivide đa phân giải (162 → 642 → 2562 đỉnh), mở đa luồng `ipctk`, tối ưu `losses.py` (lọc AABB).
-  - **Pha 4:** Viết `texture.py` (bake màu nhãn lon lên `.obj`/`.glb`) và chuẩn hóa kích thước thật (`--reference-height-mm`).
-- **Thông tin cần hỏi lại / xác nhận khi bắt đầu Pha 0 ở phiên sau:**
-  1. Xác nhận đổi tên thư mục `reconstruction_generic_code_20261114 (1)` $\rightarrow$ `reconstruction_dca_3d`.
-  2. Bộ ảnh chụp thật lon bò húc (8–12 góc) đã sẵn sàng chưa hay bắt đầu trên `raw_inputs/` trước.
+## 5. Tiến độ & Bước tiếp theo
+- **Pha 0 (ĐÃ HOÀN TẤT 100%):** Đổi tên thư mục sang `reconstruction_dca_3d`, dựng `.venv` Python `3.12.13`, chạy 5/5 `check_*.py` PASS, chạy xong Baseline 1 (`raw_inputs/`) và Baseline 2 (`ga_den_ngu` 3 ảnh mặt trước).
+- **Pha 1 (ĐÃ HOÀN TẤT 100%):**
+  - Đã cài **Cauchy Robust Loss + trọng số IRLS** (`point_terms.py`, `losses.py`, `engine.py`) với sai số gradient FD `3.36e-14`; bảo toàn 100% tương thích 5/5 `check_*.py`.
+  - Đã viết bộ giải **Joint DCA** (`code/reconstruction/dca.py`): tối ưu đồng thời `(X, C, g, lf, pp, h)`, phân cực $SO(3)$, giải bài toán con Eq. 34 bằng Matrix-Free Jacobi-PCG, tích hợp Hessian thưa của `ipctk` (`contact.py:hessian_data`, đối xứng `6.332e-16`), điều chỉnh $\mu$ thích nghi ($\times 4 / \div 3$), Homotopy $30 \to 10 \to 3$ px, giảm chấn grazing visibility (`grazing_boost` / `view_boost`) và phanh CCD.
+  - Đã nối `--optimizer dca` vào `reconstruct_images.py`, `axis_completion.py`, `completion.py`, `hidden_completion.py`.
+  - **Kết quả đối chứng `run_dca_study.py` (`c:\doan\outputs\dca_study\dca_study.json`):**
+    - `raw_inputs` sạch + IPC: `Adam` (`98.40%` IoU, `0.799 px`, `37.39s`) vs `Joint DCA` (`97.44%` IoU, `0.815 px`, `17.90s` — nhanh hơn `2.1x`, `0` tự cắt).
+    - `raw_inputs` **bơm 25% outlier SIFT (45–95 px)** + IPC: `Adam` vọt sai số điểm sạch lên **`5.428 px`** (`IoU 95.47%`), trong khi **`Joint DCA` giữ nguyên `cleanRMS = 0.973 px` (`IoU 97.57%`)** — chính xác hơn **5.6x**.
+  - **Kết quả trên 3 ảnh mặt trước con gà (`c:\doan\outputs\dca_chicken_3views`, `120.2s`):**
+    - Mask IoU tăng từ `75.58% / 82.34% / 81.27%` (Baseline 2 Adam) lên **`94.14% / 93.73% / 94.44%`** (**+14.37% IoU**), `out = 0.431 px`, `in = 0.226 px`, `median = 1.185 px`, **`fraction_within_3px = 92.59%`** (25/27 obs, 2 outlier bị hạ trọng số xuống `0.0006`), `visibility_violations = 0`, `intersecting_pairs = 0`.
+- **Bước tiếp theo — Pha 2:**
+  - Nâng cấp ghép SIFT vòng tròn 360° (`inputs.py`, `initialization.py`) + nhánh khởi tạo vòng tròn `--init-ring` cho 12 ảnh con gà (và sẵn sàng cho 8–12 ảnh lon bò húc khi có dữ liệu).
+- **Các Pha sau:**
+  - **Pha 3:** Subdivide đa phân giải (`162 → 642 → 2562` đỉnh), mở đa luồng `ipctk`, lọc AABB trong `losses.py`.
+  - **Pha 4:** Viết `texture.py` (bake màu RGB lên `.obj`/`.glb`) và chuẩn hóa kích thước thật (`--reference-height-mm`).

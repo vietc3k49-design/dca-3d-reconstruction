@@ -1,7 +1,7 @@
 # Kế hoạch Nâng cấp Thuật toán DCA & Xây dựng Bản đồ 3D Lon Bò Húc
 
-- **Trạng thái:** Đã chốt kế hoạch (chờ triển khai thực thi từ Pha 0).
-- **Thư mục mã nguồn hiện tại:** `c:\doan\reconstruction_generic_code_20261114 (1)` *(khuyến nghị đổi tên thành `c:\doan\reconstruction_dca_3d` ở Pha 0)*.
+- **Trạng thái:** **Đã xong Pha 0 & Pha 1** — sẵn sàng triển khai **Pha 2** (chạy 360° trên 12 ảnh con gà tại `c:\doan\data\ga_den_ngu`, và sẵn sàng cho bộ ảnh lon bò húc sau này).
+- **Thư mục mã nguồn hiện tại:** `c:\doan\reconstruction_dca_3d` *(đã chuẩn hóa từ `reconstruction_generic_code_20261114 (1)` ở Pha 0)*.
 - **Tài liệu thuật toán tham chiếu:** Bài báo của thầy hướng dẫn (*Single-view recovery of road geometry: a family of projections uniform in the inverse viewing distance, its orthographic limit, and a nonconvex variational problem*, 25/10/2026 — Mục 11 & Phụ lục B).
 
 ---

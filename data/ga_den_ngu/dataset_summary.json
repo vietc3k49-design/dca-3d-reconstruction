@@ -1,0 +1,290 @@
+[
+  {
+    "view": 1,
+    "raw_bbox": [
+      254,
+      395,
+      496,
+      807
+    ],
+    "crop_box": [
+      47,
+      273,
+      703,
+      929
+    ],
+    "crop_side": 656,
+    "output_size": 512,
+    "centered_bbox": [
+      162,
+      96,
+      351,
+      417
+    ],
+    "mask_fill_ratio": 0.1712188720703125
+  },
+  {
+    "view": 2,
+    "raw_bbox": [
+      276,
+      366,
+      529,
+      761
+    ],
+    "crop_box": [
+      74,
+      236,
+      730,
+      892
+    ],
+    "crop_side": 656,
+    "output_size": 512,
+    "centered_bbox": [
+      158,
+      102,
+      356,
+      410
+    ],
+    "mask_fill_ratio": 0.18018341064453125
+  },
+  {
+    "view": 3,
+    "raw_bbox": [
+      261,
+      252,
+      547,
+      704
+    ],
+    "crop_box": [
+      76,
+      150,
+      732,
+      806
+    ],
+    "crop_side": 656,
+    "output_size": 512,
+    "centered_bbox": [
+      145,
+      80,
+      368,
+      433
+    ],
+    "mask_fill_ratio": 0.23375701904296875
+  },
+  {
+    "view": 4,
+    "raw_bbox": [
+      280,
+      342,
+      502,
+      719
+    ],
+    "crop_box": [
+      63,
+      202,
+      719,
+      858
+    ],
+    "crop_side": 656,
+    "output_size": 512,
+    "centered_bbox": [
+      170,
+      110,
+      343,
+      404
+    ],
+    "mask_fill_ratio": 0.14513397216796875
+  },
+  {
+    "view": 5,
+    "raw_bbox": [
+      388,
+      386,
+      587,
+      737
+    ],
+    "crop_box": [
+      160,
+      234,
+      816,
+      890
+    ],
+    "crop_side": 656,
+    "output_size": 512,
+    "centered_bbox": [
+      178,
+      119,
+      334,
+      393
+    ],
+    "mask_fill_ratio": 0.119598388671875
+  },
+  {
+    "view": 6,
+    "raw_bbox": [
+      295,
+      392,
+      510,
+      745
+    ],
+    "crop_box": [
+      74,
+      240,
+      730,
+      896
+    ],
+    "crop_side": 656,
+    "output_size": 512,
+    "centered_bbox": [
+      173,
+      119,
+      341,
+      395
+    ],
+    "mask_fill_ratio": 0.126953125
+  },
+  {
+    "view": 7,
+    "raw_bbox": [
+      336,
+      437,
+      576,
+      798
+    ],
+    "crop_box": [
+      128,
+      290,
+      784,
+      946
+    ],
+    "crop_side": 656,
+    "output_size": 512,
+    "centered_bbox": [
+      163,
+      115,
+      350,
+      397
+    ],
+    "mask_fill_ratio": 0.14011001586914062
+  },
+  {
+    "view": 8,
+    "raw_bbox": [
+      231,
+      386,
+      483,
+      746
+    ],
+    "crop_box": [
+      29,
+      238,
+      685,
+      894
+    ],
+    "crop_side": 656,
+    "output_size": 512,
+    "centered_bbox": [
+      158,
+      116,
+      355,
+      397
+    ],
+    "mask_fill_ratio": 0.15740585327148438
+  },
+  {
+    "view": 9,
+    "raw_bbox": [
+      180,
+      201,
+      441,
+      607
+    ],
+    "crop_box": [
+      -18,
+      76,
+      638,
+      732
+    ],
+    "crop_side": 656,
+    "output_size": 512,
+    "centered_bbox": [
+      155,
+      98,
+      359,
+      415
+    ],
+    "mask_fill_ratio": 0.18444442749023438
+  },
+  {
+    "view": 10,
+    "raw_bbox": [
+      130,
+      207,
+      442,
+      694
+    ],
+    "crop_box": [
+      -42,
+      122,
+      614,
+      778
+    ],
+    "crop_side": 656,
+    "output_size": 512,
+    "centered_bbox": [
+      135,
+      67,
+      378,
+      447
+    ],
+    "mask_fill_ratio": 0.2522430419921875
+  },
+  {
+    "view": 11,
+    "raw_bbox": [
+      269,
+      342,
+      512,
+      758
+    ],
+    "crop_box": [
+      62,
+      222,
+      718,
+      878
+    ],
+    "crop_side": 656,
+    "output_size": 512,
+    "centered_bbox": [
+      162,
+      94,
+      352,
+      419
+    ],
+    "mask_fill_ratio": 0.175048828125
+  },
+  {
+    "view": 12,
+    "raw_bbox": [
+      274,
+      353,
+      496,
+      748
+    ],
+    "crop_box": [
+      57,
+      222,
+      713,
+      878
+    ],
+    "crop_side": 656,
+    "output_size": 512,
+    "centered_bbox": [
+      170,
+      103,
+      343,
+      411
+    ],
+    "mask_fill_ratio": 0.1511993408203125
+  }
+]
