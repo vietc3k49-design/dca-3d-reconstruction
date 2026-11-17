@@ -1,0 +1,11 @@
+The first IPC/cubic run used camera coefficient 1, the same default as the
+guard-only control. It has zero libigl intersections and raw RMS 0.638 px,
+but depth/width 1.871 and large unseen protrusions. Camera cost 0.222 px^2
+still outweighs shape prior 0.000197 px^2; neither camera prior is measured.
+
+Complete a matched check at camera coefficients 0.001 and 0 from the SAME
+neutral state, with the SAME IPC barrier schedule, cubic field, observations,
+axis, shape epsilon and step budget. Keep coefficient-1 result as control.
+Report all three; never select by resemblance to a known can or total cost
+across different objectives. Unknown calibration should not be presented as
+ground truth. Keep any proposed default separate from physical validation.

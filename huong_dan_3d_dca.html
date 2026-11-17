@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HÆ°á»›ng Dáº«n Dá»±ng 3D Tá»« 2 áº¢nh & Thuáº­t ToÃ¡n DCA</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 18px;
+      background: var(--background, #0f172a);
+      color: var(--foreground, #e2e8f0);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .wrap { max-width: 1020px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+    .card {
+      background: var(--card, #1e293b);
+      border: 1px solid var(--border, #334155);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .subcard {
+      background: var(--background, #0f172a);
+      border: 1px solid var(--border, #334155);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid var(--border, #334155);
+      background: var(--secondary, #334155);
+      color: var(--secondary-foreground, #f1f5f9);
+    }
+    .pill-primary {
+      background: var(--primary, #3b82f6);
+      color: var(--primary-foreground, #ffffff);
+      border-color: transparent;
+    }
+    .sec-head { border-left: 4px solid var(--primary, #3b82f6); padding-left: 12px; margin-bottom: 12px; }
+    .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted-foreground, #94a3b8); font-weight: 700; }
+    h1 { font-size: 22px; margin: 4px 0 4px 0; line-height: 1.3; }
+    h2 { font-size: 18px; margin: 4px 0 4px 0; line-height: 1.3; }
+    h3 { font-size: 15px; margin: 0 0 8px 0; }
+    .muted { color: var(--muted-foreground, #94a3b8); font-size: 13px; }
+    .small { font-size: 12px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+    .code {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--secondary, #334155);
+      color: var(--secondary-foreground, #f1f5f9);
+    }
+    .formula {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--background, #0f172a);
+      border: 1px solid var(--border, #334155);
+      overflow-x: auto;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border, #334155);
+      background: var(--background, #0f172a);
+      touch-action: none;
+    }
+    img.sample {
+      width: 100%;
+      max-width: 180px;
+      border-radius: 8px;
+      border: 1px solid var(--border, #334155);
+      display: block;
+      margin: 0 auto;
+    }
+    .row-between { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    input[type="range"] { width: 100%; accent-color: var(--primary, #3b82f6); }
+    .math { font-family: Georgia, "Times New Roman", serif; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- MENU -->
+    <nav class="card nav">
+      <strong>Lá»™ trÃ¬nh há»c tá»« Káº¿t quáº£ â†’ CÃ¡ch lÃ m</strong>
+      <div class="nav-links">
+        <a href="#s0" class="pill">0. Káº¿t quáº£</a>
+        <a href="#s1" class="pill">1. NguyÃªn lÃ½</a>
+        <a href="#s2" class="pill">2. Cáº§n gÃ¬?</a>
+        <a href="#s3" class="pill pill-primary">3. 5 Váº¥n Ä‘á» &amp; Xá»­ lÃ½</a>
+        <a href="#s4" class="pill">4. Code &amp; DCA</a>
+      </div>
+    </nav>
+
+    <!-- 0. RESULT -->
+    <section id="s0" class="card">
+      <div class="sec-head">
+        <div class="eyebrow">Pháº§n 0 Â· NhÃ¬n tá»« káº¿t quáº£</div>
+        <h1>ÄÃ­ch Ä‘áº¿n: Tá»« 2 áº£nh pháº³ng 2D â†’ Khá»‘i 3D xoay 360Â°</h1>
+        <p class="muted">KhÃ´ng dÃ¹ng AI há»c sÃ¢u, khÃ´ng biáº¿t trÆ°á»›c váº­t thá»ƒ lÃ  cÃ¡i lon, khÃ´ng biáº¿t vá»‹ trÃ­ mÃ¡y áº£nh. Chá»‰ tá»« 2 áº£nh chá»¥p, thuáº­t toÃ¡n náº·n ra mÃ´ hÃ¬nh 3D bÃªn pháº£i.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="subcard">
+          <h3>Äáº§u vÃ o tháº­t (2 gÃ³c chá»¥p chiáº¿c lon)</h3>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0;">
+            <div style="text-align:center;">
+              <img src="./reconstruction_generic_code_20261114 (1)/generic_can_axis_symmetry_soft_xeon/input_01.png" alt="áº¢nh 1" class="sample" style="background:#fff;" onerror="this.style.display='none';document.getElementById('fb-in1').style.display='block';" />
+              <div id="fb-in1" style="display:none; padding:24px 8px; border:1px dashed #64748b; border-radius:8px; font-size:12px;">áº¢nh 1 (input_01.png)</div>
+              <div class="small muted" style="margin-top:4px;">áº¢nh 1 (<span class="code">input_01</span>)</div>
+            </div>
+            <div style="text-align:center;">
+              <img src="./reconstruction_generic_code_20261114 (1)/generic_can_axis_symmetry_soft_xeon/input_02.png" alt="áº¢nh 2" class="sample" style="background:#fff;" onerror="this.style.display='none';document.getElementById('fb-in2').style.display='block';" />
+              <div id="fb-in2" style="display:none; padding:24px 8px; border:1px dashed #64748b; border-radius:8px; font-size:12px;">áº¢nh 2 (input_02.png)</div>
+              <div class="small muted" style="margin-top:4px;">áº¢nh 2 (<span class="code">input_02</span>)</div>
+            </div>
+          </div>
+          <div class="small" style="margin-top:10px; line-height:1.7;">
+            <strong>Káº¿t quáº£ Ä‘o Ä‘Æ°á»£c trong <span class="code">result.json</span>:</strong><br/>
+            â€¢ Khá»›p bÃ³ng 2D (Mask IoU): <strong>98.93%</strong> (áº¢nh 1) &amp; <strong>98.82%</strong> (áº¢nh 2)<br/>
+            â€¢ Sai sá»‘ Ä‘iá»ƒm Ä‘áº·c trÆ°ng SIFT: <strong>0.304 pixel</strong> (trÃªn 56 cáº·p Ä‘iá»ƒm)<br/>
+            â€¢ Tam giÃ¡c tá»± Ä‘Ã¢m xuyÃªn: <strong>0</strong> (lÆ°á»›i kÃ­n, há»£p lá»‡)
+          </div>
+        </div>
+
+        <div class="subcard">
+          <div class="row-between" style="margin-bottom:8px;">
+            <div>
+              <h3 style="margin:0;">Káº¿t quáº£ LÆ°á»›i 3D tháº­t (162 Ä‘á»‰nh Â· 320 máº·t)</h3>
+              <div class="small muted">KÃ©o chuá»™t trÃªn hÃ¬nh Ä‘á»ƒ xoay má»i gÃ³c</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button onclick="resetCam3D()" class="pill">ChÃ­nh diá»‡n</button>
+              <button onclick="sideCam3D()" class="pill pill-primary">Xoay máº·t khuáº¥t</button>
+            </div>
+          </div>
+          <canvas id="mesh3d-canvas" width="460" height="240" style="height:230px; cursor:grab;"></canvas>
+          <div class="row-between small muted" style="margin-top:8px;">
+            <span><strong>Quan sÃ¡t:</strong> ChÃ­nh diá»‡n ráº¥t trÃ²n Ä‘áº¹p, xoay máº·t khuáº¥t sáº½ tháº¥y hÆ¡i mÃ³p!</span>
+            <span id="angle-readout" class="code"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. CORE IDEA -->
+    <section id="s1" class="card">
+      <div class="sec-head">
+        <div class="eyebrow">Pháº§n 1 Â· NguyÃªn lÃ½ cá»‘t lÃµi</div>
+        <h2>LÃ m sao dá»±ng Ä‘Æ°á»£c khá»‘i 3D chá»‰ tá»« 2 áº£nh 2D?</h2>
+      </div>
+      <p class="muted" style="margin-top:0;">HÃ£y tÆ°á»Ÿng tÆ°á»£ng trÃ² chÆ¡i <strong>"Náº·n Ä‘áº¥t sÃ©t trÆ°á»›c 2 bÃ³ng Ä‘Ã¨n"</strong>:</p>
+      <div class="grid-3" style="margin-bottom:14px;">
+        <div class="subcard small">
+          <strong>1. Báº¯t Ä‘áº§u tá»« quáº£ cáº§u trÃ²n</strong>
+          <p class="muted">MÃ¡y chÆ°a biáº¿t hÃ¬nh dÃ¡ng váº­t, nÃªn xuáº¥t phÃ¡t tá»« 1 quáº£ cáº§u lÆ°á»›i Ä‘á»u (Icosphere 162 Ä‘á»‰nh) Ä‘áº·t á»Ÿ giá»¯a.</p>
+        </div>
+        <div class="subcard small">
+          <strong>2. Chiáº¿u thá»­ qua 2 Camera áº£o</strong>
+          <p class="muted">Chiáº¿u quáº£ cáº§u lÃªn 2 bá»©c áº£nh Ä‘á»ƒ xem cÃ¡i bÃ³ng cá»§a nÃ³ lá»‡ch chá»— nÃ o so vá»›i cÃ¡i bÃ³ng tháº­t cá»§a chiáº¿c lon.</p>
+        </div>
+        <div class="subcard small">
+          <strong>3. Vá»«a náº·n cáº§u, vá»«a xoay camera</strong>
+          <p class="muted">Chá»— thá»«a thÃ¬ Ã©p vÃ o, chá»— thiáº¿u thÃ¬ kÃ©o ra, Ä‘á»“ng thá»i chá»‰nh gÃ³c 2 camera Ä‘á»ƒ cÃ¡c cháº¥m SIFT trÃ¹ng nhau.</p>
+        </div>
+      </div>
+      <canvas id="analogy-canvas" width="900" height="190" style="height:185px;"></canvas>
+    </section>
+
+    <!-- 2. WHAT WE NEED -->
+    <section id="s2" class="card">
+      <div class="sec-head">
+        <div class="eyebrow">Pháº§n 2 Â· Cáº§n chuáº©n bá»‹ gÃ¬?</div>
+        <h2>4 nguyÃªn liá»‡u báº¯t buá»™c trÆ°á»›c khi cháº¡y tá»‘i Æ°u</h2>
+      </div>
+      <div class="grid-2">
+        <div class="subcard small">
+          <div class="row-between"><strong>1. Máº·t náº¡ bÃ³ng (Silhouette Mask)</strong><span class="code">inputs.py</span></div>
+          <p class="muted">TÃ¡ch váº­t thá»ƒ khá»i ná»n thÃ nh áº£nh Äen/Tráº¯ng (Tráº¯ng = cÃ¡i lon, Äen = ná»n) Ä‘á»ƒ mÃ¡y biáº¿t Ä‘Æ°á»ng viá»n váº­t thá»ƒ.</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; text-align:center;">
+            <div>
+              <img src="./reconstruction_generic_code_20261114 (1)/generic_can_axis_symmetry_soft_xeon/mask_01.png" alt="Mask 1" class="sample" style="max-width:110px; background:#000;" onerror="this.style.display='none';" />
+              <div class="muted">mask_01.png</div>
+            </div>
+            <div>
+              <img src="./reconstruction_generic_code_20261114 (1)/generic_can_axis_symmetry_soft_xeon/mask_02.png" alt="Mask 2" class="sample" style="max-width:110px; background:#000;" onerror="this.style.display='none';" />
+              <div class="muted">mask_02.png</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subcard small">
+          <div class="row-between"><strong>2. CÃ¡c cáº·p Ä‘iá»ƒm chung SIFT</strong><span class="code">inputs.py</span></div>
+          <p class="muted">Chá»‰ nhÃ¬n cÃ¡i bÃ³ng tráº¯ng thÃ¬ khÃ´ng biáº¿t gÃ³c chá»¥p lá»‡ch nhau bao nhiÃªu Ä‘á»™. SIFT báº¯t <strong>56 cáº·p Ä‘iá»ƒm</strong> giá»‘ng nhau trÃªn nhÃ£n lon Ä‘á»ƒ neo gÃ³c camera.</p>
+          <canvas id="sift-canvas" width="420" height="125" style="height:120px; margin-top:8px;"></canvas>
+        </div>
+
+        <div class="subcard small">
+          <div class="row-between"><strong>3. PhÃ´i lÆ°á»›i cáº§u kÃ­n (Icosphere)</strong><span class="code">initialization.py</span></div>
+          <p class="muted">Gá»“m 162 Ä‘á»‰nh vÃ  320 máº·t tam giÃ¡c bao quanh váº­t thá»ƒ. ToÃ n bá»™ quÃ¡ trÃ¬nh dá»±ng 3D chá»‰ lÃ  di chuyá»ƒn tá»a Ä‘á»™ <span class="code">X</span> cá»§a 162 Ä‘á»‰nh nÃ y.</p>
+        </div>
+
+        <div class="subcard small">
+          <div class="row-between"><strong>4. Camera áº£o &amp; PhÃ©p chiáº¿u 3D â†’ 2D</strong><span class="code">engine.py</span></div>
+          <p class="muted">Má»—i áº£nh cÃ³ vá»‹ trÃ­ <span class="code">C</span>, ma tráº­n xoay <span class="code">g</span>, tiÃªu cá»± <span class="code">lf</span>, tÃ¢m áº£nh <span class="code">pp</span>:</p>
+          <div class="formula">u = f Â· (x / z) + pp_x &nbsp;|&nbsp; v = f Â· (y / z) + pp_y</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 5 PROBLEMS & SOLUTIONS -->
+    <section id="s3" class="card">
+      <div class="sec-head">
+        <div class="eyebrow">Pháº§n 3 Â· TrÃ¡i tim thuáº­t toÃ¡n</div>
+        <h2>Khi lÃ m thá»±c táº¿, ta gáº·p 5 váº¥n Ä‘á» gÃ¬ &amp; xá»­ lÃ½ ra sao?</h2>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <!-- V1 -->
+        <div class="subcard">
+          <div class="row-between"><strong>Váº¥n Ä‘á» 1: Náº·n sao cho bÃ³ng khá»›p mÃ  lÆ°á»›i khÃ´ng bá»‹ co thÃ nh háº¡t bá»¥i?</strong><span class="code">losses.py</span></div>
+          <p class="small muted">Náº¿u chá»‰ pháº¡t pháº§n thÃ² ra ngoÃ i (<span class="code">out</span>), lÆ°á»›i sáº½ co rÃºm láº¡i Ä‘á»ƒ trá»‘n vÃ o giá»¯a mask tráº¯ng! Pháº£i dÃ¹ng <strong>2 lá»±c kÃ©o ngÆ°á»£c nhau</strong>: <span class="code">out</span> (Äá» â†’ Ã©p vÃ o) vÃ  <span class="code">inside</span> (Lam â†’ kÃ©o giÃ£n ra).</p>
+          <div class="grid-2" style="align-items:center;">
+            <canvas id="sil-canvas" width="540" height="205" style="height:200px; background:#0f172a;"></canvas>
+            <div class="small" style="display:flex; flex-direction:column; gap:10px;">
+              <div id="sil-readout" style="font-weight:700; font-size:14px;"></div>
+              <label>KÃ­ch thÆ°á»›c bÃ³ng lÆ°á»›i 3D: <input id="sil-w" type="range" min="40" max="220" value="175" oninput="drawSilhouette()" /></label>
+              <label>Dá»‹ch trÃ¡i / pháº£i: <input id="sil-dx" type="range" min="-80" max="80" value="30" oninput="drawSilhouette()" /></label>
+              <span class="muted">KÃ©o 2 thanh vá» giá»¯a Ä‘á»ƒ tháº¥y vÃ¹ng Äá» &amp; Lam biáº¿n máº¥t, IoU tÄƒng lÃªn ~100%.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- V2 -->
+        <div class="subcard small">
+          <div class="row-between"><strong>Váº¥n Ä‘á» 2: Váº­t thá»ƒ &amp; Camera cÃ¹ng phÃ³ng to gáº¥p 10 thÃ¬ áº£nh váº«n y há»‡t!</strong><span class="code">Similarity Gauge</span></div>
+          <p class="muted" style="margin-bottom:0;">VÃ¬ khÃ´ng biáº¿t kÃ­ch thÆ°á»›c tháº­t ngoÃ i Ä‘á»i (cm), tá»a Ä‘á»™ ráº¥t dá»… trÃ´i ra vÃ´ cá»±c. <strong>CÃ¡ch xá»­ lÃ½:</strong> Sau má»—i bÆ°á»›c cáº­p nháº­t, dá»‹ch tÃ¢m váº­t vá» <span class="code">(0,0,0)</span> vÃ  co giÃ£n cáº£ lÆ°á»›i láº«n camera Ä‘á»ƒ khoáº£ng cÃ¡ch tá»›i Camera 1 luÃ´n cá»‘ Ä‘á»‹nh = 3 Ä‘Æ¡n vá»‹.</p>
+        </div>
+
+        <!-- V3 -->
+        <div class="subcard">
+          <div class="row-between"><strong>Váº¥n Ä‘á» 3: Äiá»ƒm SIFT bá»‹ trÆ°á»£t ra... máº·t sau lÆ°ng váº­t thá»ƒ!</strong><span class="code">viscost (First-Hit)</span></div>
+          <p class="small muted">CÃ´ng thá»©c chiáº¿u <span class="code">x/z</span> khÃ´ng tá»± biáº¿t che khuáº¥t. <strong>CÃ¡ch xá»­ lÃ½:</strong> Báº¯n tia tá»« Camera tá»›i Ä‘iá»ƒm SIFT; náº¿u cÃ³ máº·t tam giÃ¡c khÃ¡c cháº¯n phÃ­a trÆ°á»›c (<span class="math">t &lt; 1</span>), <span class="code">viscost</span> láº­p tá»©c Ä‘áº©y máº·t cháº¯n lÃ¹i ra sau.</p>
+          <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <button onclick="setVisMode(false)" id="vis-btn-ok" class="pill pill-primary">Há»£p lá»‡ (t = 1)</button>
+            <button onclick="setVisMode(true)" id="vis-btn-bad" class="pill">Bá»‹ máº·t khÃ¡c cháº¯n trÆ°á»›c (t &lt; 1)</button>
+          </div>
+          <canvas id="vis-canvas" width="840" height="185" style="height:180px;"></canvas>
+        </div>
+
+        <!-- V4 -->
+        <div class="subcard">
+          <div class="row-between"><strong>Váº¥n Ä‘á» 4: Náº·n máº¡nh quÃ¡ lÃ m lÆ°á»›i tá»± Ä‘Ã¢m xuyÃªn qua nhau!</strong><span class="code">contact.py Â· IPC + CCD</span></div>
+          <p class="small muted"><strong>CÃ¡ch xá»­ lÃ½ 3 lá»›p:</strong> (1) <strong>CCD</strong> kiá»ƒm tra Ä‘Æ°á»ng bay vÃ  phanh cáº¯t ngáº¯n bÆ°á»›c nháº£y (<span class="code">0.99 Ã— fraction</span>) trÆ°á»›c khi cháº¡m; (2) <strong>RÃ o cáº£n IPC</strong> táº¡o lá»±c Ä‘áº©y <span class="math">â†’ +âˆž</span> khi khoáº£ng cÃ¡ch <span class="code">&lt; 0.02</span>; (3) <strong>libigl</strong> kiá»ƒm Ä‘á»‹nh láº¡i cÃ³ Ä‘Ãºng 0 cáº·p cáº¯t nhau.</p>
+          <div class="grid-2" style="align-items:center;">
+            <canvas id="ccd-canvas" width="560" height="200" style="height:195px;"></canvas>
+            <div class="small" style="display:flex; flex-direction:column; gap:10px;">
+              <div id="ccd-readout" style="font-weight:700;"></div>
+              <label>Äá»™ lá»›n bÆ°á»›c nháº£y Ä‘á» xuáº¥t (Î”X): <input id="ccd-step" type="range" min="20" max="245" value="195" oninput="drawCCD()" /></label>
+              <span class="muted">Khi mÅ©i tÃªn Ä‘Ã¢m qua tÆ°á»ng, CCD láº­p tá»©c phanh Ä‘á»©ng láº¡i á»Ÿ cháº¥m xanh lÃ¡ trÆ°á»›c tÆ°á»ng!</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- V5 -->
+        <div class="subcard small">
+          <div class="row-between"><strong>Váº¥n Ä‘á» 5: Máº·t trÆ°á»›c khá»›p 98.9%, nhÆ°ng máº·t sau khuáº¥t bá»‹ lá»“i lÃµm!</strong><span class="code">hidden_completion.py</span></div>
+          <p class="muted" style="margin-bottom:0;">VÃ¬ chá»‰ cÃ³ 2 gÃ³c áº£nh, vÃ¹ng lÆ°ng khuáº¥t khÃ´ng chá»‹u lá»±c Ã©p tá»« bÃ³ng hay SIFT. <strong>CÃ¡ch xá»­ lÃ½:</strong> ThÃªm tiÃªn nghiá»‡m lÃ m mÆ°á»£t &amp; Ä‘á»‘i xá»©ng <span class="code">C8</span> (<span class="code">priors.py</span>), sau Ä‘Ã³ á»Ÿ 900 bÆ°á»›c cuá»‘i <strong>Ä‘Ã³ng bÄƒng máº·t trÆ°á»›c &amp; camera</strong>, chá»‰ náº·n mÆ°á»£t ~106 Ä‘á»‰nh máº·t sau.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. SOLVER & DCA -->
+    <section id="s4" class="card">
+      <div class="sec-head">
+        <div class="eyebrow">Pháº§n 4 Â· Bá»™ giáº£i tá»‘i Æ°u</div>
+        <h2>Code cháº¡y Adam-Armijo vs LÃ½ thuyáº¿t DCA cá»§a Tháº§y</h2>
+      </div>
+
+      <div class="formula" style="margin-bottom:14px;">
+        HÃ m má»¥c tiÃªu tá»•ng: total = out + inside + 1.5*point + viscost + prior + camera_pen + contact_cost
+      </div>
+
+      <div class="grid-2" style="margin-bottom:14px;">
+        <div class="subcard small">
+          <strong>Trong Code (<span class="code">optimizer.py</span> &amp; <span class="code">lbfgs.py</span>)</strong>
+          <p class="muted">DÃ¹ng <strong>Adam tiá»n Ä‘iá»u kiá»‡n + TÃ¬m Ä‘Æ°á»ng Armijo + Phanh CCD</strong> (vÃ  báº£n Ä‘á»‘i chá»©ng <strong>L-BFGS-B</strong>). File <span class="code">START_HERE.txt</span> ghi rÃµ gÃ³i code nÃ y chÆ°a cÃ i Ä‘áº·t DCA, mÃ  dÃ¹ng Ä‘á»ƒ kháº£o sÃ¡t giá»›i háº¡n cá»§a hÃ m má»¥c tiÃªu 2 áº£nh.</p>
+        </div>
+        <div class="subcard small">
+          <strong>Thuáº­t toÃ¡n DCA cá»§a Tháº§y (Quy hoáº¡ch DC)</strong>
+          <p class="muted">TÃ¡ch hÃ m lá»—i khÃ´ng lá»“i thÃ nh hiá»‡u 2 hÃ m lá»“i <span class="math"><strong>f(x) = g(x) âˆ’ h(x)</strong></span>. Táº¡i má»—i bÆ°á»›c <span class="math">k</span>, thay pháº§n trá»« <span class="math">âˆ’h(x)</span> báº±ng Ä‘Æ°á»ng tiáº¿p tuyáº¿n Ä‘á»ƒ táº¡o 1 "bÃ¡t lá»“i" trÃ¹m lÃªn trÃªn, rá»“i nháº£y xuá»‘ng Ä‘Ã¡y cÃ¡i bÃ¡t Ä‘Ã³!</p>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="row-between" style="margin-bottom:10px;">
+          <div class="small"><strong>MÃ´ phá»ng DCA:</strong> ÄÆ°á»ng liá»n = hÃ m lá»—i <span class="math">f(x)</span>; ÄÆ°á»ng nÃ©t Ä‘á»©t = bÃ¡t lá»“i <span class="math">Ï•_k(x)</span>.</div>
+          <div style="display:flex; gap:6px;">
+            <button onclick="stepDCA()" class="pill pill-primary">BÆ°á»›c láº·p k â†’ k+1</button>
+            <button onclick="resetDCA()" class="pill">Reset</button>
+          </div>
+        </div>
+        <div class="row-between small" style="margin-bottom:8px;">
+          <label style="display:flex; align-items:center; gap:8px; min-width:220px;">
+            <span>Äiá»ƒm Ä‘áº§u xâ‚€:</span>
+            <input id="dca-init-slider" type="range" min="-2.2" max="2.2" step="0.1" value="-1.8" oninput="changeInitX(this.value)" style="width:130px;" />
+            <span id="dca-init-label" class="code">-1.8</span>
+          </label>
+          <span id="dca-status" class="code"></span>
+        </div>
+        <canvas id="dca-canvas" width="840" height="220" style="height:215px;"></canvas>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // 3D MESH FROM result.json
+    const MESH_VERTS=[[-0.259,0.463,-0.429],[0.251,-0.318,-0.403],[-0.283,0.400,0.452],[0.206,-0.516,0.369],[0.069,0.823,0.207],[0.078,0.843,-0.109],[-0.061,-0.826,0.090],[-0.049,-0.854,-0.233],[0.113,-0.829,-0.027],[0.272,0.651,0.055],[-0.237,-0.671,-0.052],[-0.116,0.850,0.030],[-0.203,-0.544,0.349],[-0.257,-0.552,0.232],[-0.106,-0.820,0.022],[-0.287,-0.414,-0.326],[-0.141,-0.488,-0.406],[-0.150,-0.854,-0.139],[0.071,-0.975,0.059],[-0.056,-0.932,-0.045],[0.080,-0.842,-0.152],[0.122,0.472,0.363],[0.019,0.634,0.310],[-0.026,0.013,0.529],[-0.054,-0.643,0.240],[0.253,-0.584,0.229],[-0.312,0.586,-0.267],[-0.370,0.176,-0.004],[-0.332,0.543,0.322],[-0.056,0.847,0.059],[0.076,0.898,0.044],[-0.051,0.853,0.038],[0.043,0.667,-0.224],[0.176,0.506,-0.333],[0.049,-0.001,-0.459],[-0.029,-0.612,-0.295],[0.255,-0.533,-0.245],[0.326,0.521,0.394],[0.334,-0.142,0.011],[0.104,0.840,-0.002],[0.102,0.827,0.112],[0.348,0.552,-0.309],[-0.116,-0.725,0.185],[-0.140,-0.705,0.159],[-0.091,-0.950,0.084],[-0.289,-0.079,0.330],[-0.240,-0.522,0.264],[-0.255,-0.122,0.376],[-0.185,-0.794,-0.029],[-0.228,-0.732,0.139],[-0.246,-0.638,0.064],[-0.264,-0.531,-0.074],[-0.231,-0.701,-0.228],[-0.199,-0.796,-0.059],[-0.249,-0.095,-0.428],[-0.210,-0.592,-0.325],[-0.334,-0.088,-0.409],[-0.105,-0.851,-0.186],[-0.152,-0.727,-0.260],[-0.092,-0.747,-0.303],[0.107,-0.921,0.003],[0.073,-0.906,-0.044],[0.091,-0.851,-0.106],[-0.046,-0.977,0.038],[0.010,-0.982,0.007],[0.015,-1.006,0.085],[0.015,-0.857,-0.191],[0.012,-0.918,-0.096],[-0.052,-0.893,-0.141],[-0.111,-0.863,-0.094],[-0.107,-0.912,0.011],[-0.104,-0.828,-0.036],[0.280,0.124,0.472],[0.093,0.174,0.429],[0.169,-0.292,0.441],[0.088,0.748,0.275],[0.038,0.555,0.354],[0.031,0.727,0.269],[-0.233,0.252,0.453],[-0.055,0.414,0.386],[-0.106,0.493,0.336],[0.072,-0.510,0.290],[0.044,-0.629,0.190],[0.235,-0.490,0.294],[-0.021,-0.727,0.144],[-0.098,-0.756,0.187],[0.176,-0.858,0.060],[0.118,-0.873,0.099],[-0.205,-0.238,0.445],[-0.092,-0.554,0.290],[0.007,-0.419,0.341],[-0.250,0.828,-0.075],[-0.353,0.412,-0.180],[-0.302,0.684,-0.005],[-0.371,0.172,-0.351],[-0.305,0.482,-0.386],[-0.293,-0.352,-0.046],[-0.329,-0.163,-0.221],[-0.318,-0.142,0.142],[-0.326,0.386,0.411],[-0.358,0.176,0.316],[-0.364,0.396,0.191],[-0.257,0.819,0.134],[-0.072,0.624,0.250],[0.042,0.823,0.160],[-0.004,0.724,0.218],[-0.084,0.790,0.122],[-0.065,0.850,0.057],[0.055,0.910,0.078],[0.015,0.915,0.074],[0.054,0.840,-0.055],[0.016,0.923,-0.009],[0.067,0.916,0.009],[-0.033,0.872,0.048],[-0.061,0.855,0.039],[-0.075,0.804,-0.042],[0.107,0.776,-0.186],[0.014,0.747,-0.126],[-0.052,0.651,-0.171],[-0.080,0.529,-0.274],[-0.003,0.452,-0.325],[-0.155,0.287,-0.386],[0.063,0.753,-0.169],[0.091,0.588,-0.272],[0.163,-0.279,-0.471],[0.155,0.220,-0.382],[0.313,0.186,-0.428],[0.108,-0.465,-0.325],[0.077,-0.470,-0.428],[-0.026,-0.601,-0.389],[-0.051,-0.804,-0.316],[-0.105,-0.158,-0.412],[0.143,-0.794,-0.174],[0.207,-0.815,-0.132],[0.044,-0.757,-0.254],[0.298,-0.274,-0.367],[0.113,-0.670,-0.291],[0.314,0.664,0.114],[0.374,0.206,0.240],[0.358,0.431,0.084],[0.300,-0.177,0.302],[0.294,0.103,0.402],[0.240,-0.632,-0.001],[0.286,-0.412,0.152],[0.181,0.813,0.036],[0.111,0.848,0.025],[0.183,0.808,0.049],[0.103,0.860,0.027],[0.067,0.891,-0.013],[0.050,0.880,0.116],[0.098,0.855,0.069],[0.096,0.706,0.216],[0.221,0.489,0.396],[0.232,0.712,0.233],[0.320,0.671,0.015],[0.247,0.728,-0.144],[0.267,0.531,-0.312],[0.358,0.152,-0.387],[0.123,0.728,-0.141],[0.284,-0.401,-0.161],[0.324,-0.174,-0.294],[0.387,0.222,-0.169]];
+    const MESH_FACES=[[6,42,44],[12,43,42],[14,44,43],[42,43,44],[2,45,47],[13,46,45],[12,47,46],[45,46,47],[10,48,50],[14,49,48],[13,50,49],[48,49,50],[12,46,43],[13,49,46],[14,43,49],[46,49,43],[10,51,53],[15,52,51],[17,53,52],[51,52,53],[0,54,56],[16,55,54],[15,56,55],[54,55,56],[7,57,59],[17,58,57],[16,59,58],[57,58,59],[15,55,52],[16,58,55],[17,52,58],[55,58,52],[8,60,62],[18,61,60],[20,62,61],[60,61,62],[6,63,65],[19,64,63],[18,65,64],[63,64,65],[7,66,68],[20,67,66],[19,68,67],[66,67,68],[18,64,61],[19,67,64],[20,61,67],[64,67,61],[7,68,57],[19,69,68],[17,57,69],[68,69,57],[6,44,63],[14,70,44],[19,63,70],[44,70,63],[10,53,48],[17,71,53],[14,48,71],[53,71,48],[19,70,69],[14,71,70],[17,69,71],[70,71,69],[3,72,74],[21,73,72],[23,74,73],[72,73,74],[4,75,77],[22,76,75],[21,77,76],[75,76,77],[2,78,80],[23,79,78],[22,80,79],[78,79,80],[21,76,73],[22,79,76],[23,73,79],[76,79,73],[3,81,83],[24,82,81],[25,83,82],[81,82,83],[6,65,85],[18,84,65],[24,85,84],[65,84,85],[8,86,60],[25,87,86],[18,60,87],[86,87,60],[24,84,82],[18,87,84],[25,82,87],[84,87,82],[2,47,78],[12,88,47],[23,78,88],[47,88,78],[6,85,42],[24,89,85],[12,42,89],[85,89,42],[3,74,81],[23,90,74],[24,81,90],[74,90,81],[12,89,88],[24,90,89],[23,88,90],[89,90,88],[11,91,93],[26,92,91],[27,93,92],[91,92,93],[0,56,95],[15,94,56],[26,95,94],[56,94,95],[10,96,51],[27,97,96],[15,51,97],[96,97,51],[26,94,92],[15,97,94],[27,92,97],[94,97,92],[10,50,96],[13,98,50],[27,96,98],[50,98,96],[2,99,45],[28,100,99],[13,45,100],[99,100,45],[11,93,102],[27,101,93],[28,102,101],[93,101,102],[13,100,98],[28,101,100],[27,98,101],[100,101,98],[2,80,99],[22,103,80],[28,99,103],[80,103,99],[4,104,75],[29,105,104],[22,75,105],[104,105,75],[11,102,107],[28,106,102],[29,107,106],[102,106,107],[22,105,103],[29,106,105],[28,103,106],[105,106,103],[4,108,104],[30,109,108],[29,104,109],[108,109,104],[5,110,112],[31,111,110],[30,112,111],[110,111,112],[11,107,114],[29,113,107],[31,114,113],[107,113,114],[30,111,109],[31,113,111],[29,109,113],[111,113,109],[11,114,91],[31,115,114],[26,91,115],[114,115,91],[5,116,110],[32,117,116],[31,110,117],[116,117,110],[0,95,119],[26,118,95],[32,119,118],[95,118,119],[31,117,115],[32,118,117],[26,115,118],[117,118,115],[0,119,121],[32,120,119],[34,121,120],[119,120,121],[5,122,116],[33,123,122],[32,116,123],[122,123,116],[1,124,126],[34,125,124],[33,126,125],[124,125,126],[32,123,120],[33,125,123],[34,120,125],[123,125,120],[1,127,124],[35,128,127],[34,124,128],[127,128,124],[7,59,130],[16,129,59],[35,130,129],[59,129,130],[0,121,54],[34,131,121],[16,54,131],[121,131,54],[35,129,128],[16,131,129],[34,128,131],[129,131,128],[8,62,133],[20,132,62],[36,133,132],[62,132,133],[7,130,66],[35,134,130],[20,66,134],[130,134,66],[1,135,127],[36,136,135],[35,127,136],[135,136,127],[20,134,132],[35,136,134],[36,132,136],[134,136,132],[9,137,139],[37,138,137],[38,139,138],[137,138,139],[3,83,141],[25,140,83],[37,141,140],[83,140,141],[8,142,86],[38,143,142],[25,86,143],[142,143,86],[37,140,138],[25,143,140],[38,138,143],[140,143,138],[9,144,146],[39,145,144],[40,146,145],[144,145,146],[5,112,148],[30,147,112],[39,148,147],[112,147,148],[4,149,108],[40,150,149],[30,108,150],[149,150,108],[39,147,145],[30,150,147],[40,145,150],[147,150,145],[4,77,149],[21,151,77],[40,149,151],[77,151,149],[3,141,72],[37,152,141],[21,72,152],[141,152,72],[9,146,137],[40,153,146],[37,137,153],[146,153,137],[21,152,151],[37,153,152],[40,151,153],[152,153,151],[9,154,144],[41,155,154],[39,144,155],[154,155,144],[1,126,157],[33,156,126],[41,157,156],[126,156,157],[5,148,122],[39,158,148],[33,122,158],[148,158,122],[41,156,155],[33,158,156],[39,155,158],[156,158,155],[8,133,142],[36,159,133],[38,142,159],[133,159,142],[1,157,135],[41,160,157],[36,135,160],[157,160,135],[9,139,154],[38,161,139],[41,154,161],[139,161,154],[36,160,159],[41,161,160],[38,159,161],[160,161,159]];
+
+    function themeVal(name, fb) {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return v || fb;
+    }
+
+    let yaw = 0.35, pitch = 0.2, dragging = false, lastX = 0, lastY = 0;
+    const c3d = document.getElementById('mesh3d-canvas');
+    c3d.addEventListener('pointerdown', e => { dragging = true; lastX = e.clientX; lastY = e.clientY; try { c3d.setPointerCapture(e.pointerId); } catch(err){} });
+    c3d.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      yaw += (e.clientX - lastX) * 0.01;
+      pitch = Math.max(-1.4, Math.min(1.4, pitch + (e.clientY - lastY) * 0.01));
+      lastX = e.clientX; lastY = e.clientY;
+      draw3D();
+    });
+    c3d.addEventListener('pointerup', () => { dragging = false; });
+    function resetCam3D() { yaw = 0.35; pitch = 0.2; draw3D(); }
+    function sideCam3D() { yaw = 1.57; pitch = 0.1; draw3D(); }
+
+    function draw3D() {
+      const ctx = c3d.getContext('2d'), W = c3d.width, H = c3d.height;
+      ctx.clearRect(0, 0, W, H);
+      const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+      document.getElementById('angle-readout').textContent = 'GÃ³c: ' + Math.round(yaw*180/Math.PI) + 'Â°';
+      const tv = MESH_VERTS.map(([vx, vy, vz]) => {
+        const x1 = vx*cy - vy*sy, y1 = vx*sy + vy*cy, z1 = vz;
+        const y2 = y1*cp - z1*sp, z2 = y1*sp + z1*cp;
+        const scale = 185 / (2.8 - y2);
+        return [W/2 + x1*scale, H/2 - z2*scale, y2, x1, y2, z2];
+      });
+      const tris = MESH_FACES.map(f => {
+        const a = tv[f[0]], b = tv[f[1]], c = tv[f[2]];
+        const depth = (a[2]+b[2]+c[2])/3;
+        const ux=b[3]-a[3], uy=b[4]-a[4], uz=b[5]-a[5], wx=c[3]-a[3], wy=c[4]-a[4], wz=c[5]-a[5];
+        const nx=uy*wz-uz*wy, ny=uz*wx-ux*wz, nz=ux*wy-uy*wx;
+        const nlen = Math.hypot(nx, ny, nz) || 1;
+        const light = Math.max(0.2, (-ny*0.7 + nz*0.5 + nx*0.3)/nlen);
+        return { a, b, c, depth, light };
+      }).sort((u, v) => u.depth - v.depth);
+
+      for (const t of tris) {
+        ctx.beginPath(); ctx.moveTo(t.a[0], t.a[1]); ctx.lineTo(t.b[0], t.b[1]); ctx.lineTo(t.c[0], t.c[1]); ctx.closePath();
+        const s = Math.round(70 + t.light*155);
+        ctx.fillStyle = `rgb(${Math.round(s*0.45)},${Math.round(s*0.72)},${s})`;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(15,23,42,0.35)'; ctx.lineWidth = 0.7; ctx.stroke();
+      }
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color) {
+      ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      const ang = Math.atan2(y2-y1, x2-x1);
+      ctx.beginPath(); ctx.moveTo(x2, y2);
+      ctx.lineTo(x2-8*Math.cos(ang-0.5), y2-8*Math.sin(ang-0.5));
+      ctx.lineTo(x2-8*Math.cos(ang+0.5), y2-8*Math.sin(ang+0.5));
+      ctx.closePath(); ctx.fill();
+    }
+
+    function drawAnalogy() {
+      const c = document.getElementById('analogy-canvas'), ctx = c.getContext('2d'), W = c.width, H = c.height;
+      ctx.clearRect(0, 0, W, H);
+      const fg = themeVal('--foreground', '#e2e8f0'), primary = themeVal('--primary', '#3b82f6'), muted = themeVal('--muted-foreground', '#94a3b8');
+      ctx.strokeStyle = muted; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(110, 86, 40, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(110, 86, 40, 15, 0, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(110, 86, 15, 40, 0, 0, Math.PI*2); ctx.stroke();
+      ctx.fillStyle = fg; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('1. Quáº£ cáº§u ban Ä‘áº§u', 110, 152);
+      drawArrow(ctx, 180, 86, 250, 86, primary);
+
+      ctx.fillStyle = 'rgba(59,130,246,0.22)'; ctx.strokeStyle = primary; ctx.lineWidth = 2;
+      ctx.fillRect(410, 44, 58, 86); ctx.strokeRect(410, 44, 58, 86);
+      ctx.fillStyle = fg; ctx.fillRect(305, 74, 22, 24); ctx.fillRect(545, 36, 22, 24);
+      ctx.strokeStyle = '#10b981'; ctx.setLineDash([4,4]);
+      ctx.beginPath(); ctx.moveTo(327, 86); ctx.lineTo(410, 56); ctx.moveTo(327, 86); ctx.lineTo(410, 122); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(545, 48); ctx.lineTo(468, 46); ctx.moveTo(545, 48); ctx.lineTo(468, 128); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = fg; ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('2. Vá»«a náº·n cáº§u, vá»«a xoay 2 Camera', 438, 156);
+      ctx.fillStyle = muted; ctx.font = '11px sans-serif';
+      ctx.fillText('sao cho bÃ³ng + Ä‘iá»ƒm SIFT khá»›p cáº£ 2 áº£nh', 438, 172);
+      drawArrow(ctx, 615, 86, 685, 86, primary);
+
+      ctx.fillStyle = 'rgba(16,185,129,0.25)'; ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2.5;
+      ctx.fillRect(755, 42, 56, 88); ctx.strokeRect(755, 42, 56, 88);
+      ctx.fillStyle = fg; ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('3. Khá»‘i 3D khá»›p 98.9%', 783, 156);
+      ctx.fillStyle = '#10b981'; ctx.font = '11px sans-serif';
+      ctx.fillText('(0 tá»± giao cáº¯t)', 783, 172);
+      ctx.textAlign = 'left';
+    }
+
+    function drawSift() {
+      const c = document.getElementById('sift-canvas'), ctx = c.getContext('2d'), W = c.width, H = c.height;
+      ctx.clearRect(0, 0, W, H);
+      const fg = themeVal('--foreground', '#e2e8f0'), border = themeVal('--border', '#334155');
+      ctx.strokeStyle = border; ctx.lineWidth = 1.5;
+      ctx.strokeRect(20, 14, 130, 92); ctx.strokeRect(270, 14, 130, 92);
+      ctx.fillStyle = 'rgba(59,130,246,0.2)'; ctx.fillRect(60, 24, 48, 70); ctx.fillRect(310, 24, 48, 70);
+      const ptsA = [[74,40],[92,56],[78,80]], ptsB = [[322,44],[344,54],[328,82]], cols = ['#ef4444','#10b981','#f59e0b'];
+      for (let i=0; i<3; i++) {
+        ctx.strokeStyle = cols[i]; ctx.lineWidth = 1.8; ctx.setLineDash([4,3]);
+        ctx.beginPath(); ctx.moveTo(ptsA[i][0], ptsA[i][1]); ctx.lineTo(ptsB[i][0], ptsB[i][1]); ctx.stroke();
+        ctx.setLineDash([]); ctx.fillStyle = cols[i];
+        ctx.beginPath(); ctx.arc(ptsA[i][0], ptsA[i][1], 4, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ptsB[i][0], ptsB[i][1], 4, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.fillStyle = fg; ctx.font = '11px sans-serif';
+      ctx.fillText('áº¢nh 1', 70, 118); ctx.fillText('áº¢nh 2', 320, 118); ctx.fillText('56 cáº·p SIFT chung', 162, 24);
+    }
+
+    function drawSilhouette() {
+      const c = document.getElementById('sil-canvas'), ctx = c.getContext('2d'), W = c.width, H = c.height;
+      ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, W, H);
+      const mw=126, mh=144, mx=W/2-mw/2, my=H/2-mh/2;
+      const pw=parseInt(document.getElementById('sil-w').value,10), dx=parseInt(document.getElementById('sil-dx').value,10);
+      const ph=128, px=W/2-pw/2+dx, py=H/2-ph/2;
+      const ix1=Math.max(mx,px), iy1=Math.max(my,py), ix2=Math.min(mx+mw,px+pw), iy2=Math.min(my+mh,py+ph);
+      const iw=Math.max(0,ix2-ix1), ih=Math.max(0,iy2-iy1), inter=iw*ih, iou=(inter/(mw*mh+pw*ph-inter))*100;
+
+      ctx.fillStyle = 'rgba(59,130,246,0.8)'; ctx.fillRect(mx, my, mw, mh);
+      ctx.fillStyle = 'rgba(239,68,68,0.8)'; ctx.fillRect(px, py, pw, ph);
+      if (iw>0 && ih>0) { ctx.fillStyle = 'rgba(16,185,129,0.9)'; ctx.fillRect(ix1, iy1, iw, ih); }
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.strokeRect(mx, my, mw, mh);
+      ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2; ctx.setLineDash([6,4]); ctx.strokeRect(px, py, pw, ph); ctx.setLineDash([]);
+
+      if (px+pw > mx+mw+6) drawArrow(ctx, px+pw-4, H/2, mx+mw+4, H/2, '#fca5a5');
+      if (px < mx-6) drawArrow(ctx, px+4, H/2, mx-4, H/2, '#fca5a5');
+      if (px > mx+6) drawArrow(ctx, px+2, H/2-26, mx+8, H/2-26, '#93c5fd');
+      if (px+pw < mx+mw-6) drawArrow(ctx, px+pw-2, H/2-26, mx+mw-8, H/2-26, '#93c5fd');
+
+      ctx.fillStyle = '#e2e8f0'; ctx.font = '11px sans-serif';
+      ctx.fillText('Äá» = Thá»«a (out) | Lam = Thiáº¿u (inside) | Xanh lÃ¡ = TrÃ¹ng khá»›p', 14, 18);
+      document.getElementById('sil-readout').textContent = 'Äá»™ trÃ¹ng khá»›p (IoU): ' + iou.toFixed(1) + '%';
+    }
+
+    let visOccluded = false;
+    function setVisMode(occ) {
+      visOccluded = occ;
+      document.getElementById('vis-btn-ok').className = occ ? 'pill' : 'pill pill-primary';
+      document.getElementById('vis-btn-bad').className = occ ? 'pill pill-primary' : 'pill';
+      drawVis();
+    }
+    function drawVis() {
+      const c = document.getElementById('vis-canvas'), ctx = c.getContext('2d'), W = c.width, H = c.height;
+      ctx.clearRect(0, 0, W, H);
+      const fg = themeVal('--foreground', '#e2e8f0'), primary = themeVal('--primary', '#3b82f6');
+      const camX=80, camY=H/2, ptX=560, ptY=H/2;
+      ctx.fillStyle = fg; ctx.fillRect(camX-18, camY-14, 26, 28);
+      ctx.beginPath(); ctx.moveTo(camX+8, camY-7); ctx.lineTo(camX+22, camY-16); ctx.lineTo(camX+22, camY+16); ctx.lineTo(camX+8, camY+7); ctx.fill();
+      ctx.font = 'bold 12px sans-serif'; ctx.fillText('Camera', camX-22, camY+34);
+      ctx.strokeStyle = visOccluded ? '#ef4444' : '#10b981'; ctx.lineWidth = 2.5; ctx.setLineDash([6,4]);
+      ctx.beginPath(); ctx.moveTo(camX+22, camY); ctx.lineTo(ptX, ptY); ctx.stroke(); ctx.setLineDash([]);
+      ctx.strokeStyle = primary; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(ptX-18, 30); ctx.lineTo(ptX+22, H-30); ctx.stroke();
+
+      if (visOccluded) {
+        const occX = 340;
+        ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.moveTo(occX+14, 28); ctx.lineTo(occX-14, H-28); ctx.stroke();
+        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(occX, camY, 7, 0, Math.PI*2); ctx.fill();
+        ctx.fillText('Bá»‹ máº·t nÃ y che khuáº¥t (t < 1)!', occX-75, 20);
+        drawArrow(ctx, occX, camY-24, occX+55, camY-24, '#f59e0b');
+        ctx.fillStyle = '#f59e0b'; ctx.fillText('viscost Ä‘áº©y máº·t cháº¯n ra sau', occX-65, H-12);
+      } else {
+        ctx.fillStyle = '#10b981'; ctx.font = 'bold 13px sans-serif';
+        ctx.fillText('Tia nhÃ¬n cháº¡m tháº³ng Ä‘iá»ƒm SIFT Ä‘áº§u tiÃªn (t = 1) â†’ Há»£p lá»‡!', 200, 28);
+      }
+      ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(ptX, ptY, 7, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = fg; ctx.font = 'bold 12px sans-serif'; ctx.fillText('Äiá»ƒm SIFT neo trÃªn lÆ°á»›i', ptX+14, ptY+4);
+    }
+
+    function drawCCD() {
+      const c = document.getElementById('ccd-canvas'), ctx = c.getContext('2d'), W = c.width, H = c.height;
+      ctx.clearRect(0, 0, W, H);
+      const fg = themeVal('--foreground', '#e2e8f0'), primary = themeVal('--primary', '#3b82f6');
+      const wallX=225, startX=60, y=108, step=parseInt(document.getElementById('ccd-step').value,10);
+      const proposedX=startX+step, fraction=proposedX>=wallX ? ((wallX-startX)/step)*0.96 : 1.0, safeX=startX+step*fraction;
+
+      ctx.strokeStyle = '#64748b'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(wallX, 28); ctx.lineTo(wallX, 168); ctx.stroke();
+      ctx.fillStyle = fg; ctx.font = '12px sans-serif'; ctx.fillText('Máº·t Ä‘á»‘i diá»‡n', wallX-34, 20);
+      ctx.fillStyle = 'rgba(236,72,153,0.16)'; ctx.fillRect(wallX-26, 28, 26, 140);
+      ctx.fillStyle = '#ec4899'; ctx.font = '11px sans-serif'; ctx.fillText('Äá»‡m dÌ‚=0.02', wallX-44, 184);
+
+      ctx.strokeStyle = proposedX>=wallX ? '#ef4444' : primary; ctx.lineWidth = 2; ctx.setLineDash([5,4]);
+      ctx.beginPath(); ctx.moveTo(startX, y); ctx.lineTo(proposedX, y); ctx.stroke(); ctx.setLineDash([]);
+      drawArrow(ctx, startX, y, safeX, y, '#10b981');
+      ctx.fillStyle = fg; ctx.beginPath(); ctx.arc(startX, y, 5.5, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(safeX, y, 5.5, 0, Math.PI*2); ctx.fill();
+      ctx.fillText('Dá»«ng an toÃ n', safeX-34, y-12);
+      if (proposedX >= wallX) { ctx.fillStyle = '#ef4444'; ctx.fillText('âœ— ÄÃ¢m xuyÃªn (Bá»‹ CCD cháº·t!)', proposedX-60, y+22); }
+
+      const gx=350, gy=166, gw=185, gh=118;
+      ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(gx, gy-gh); ctx.lineTo(gx, gy); ctx.lineTo(gx+gw, gy); ctx.stroke();
+      ctx.fillStyle = fg; ctx.font = '11px sans-serif';
+      ctx.fillText('RÃ o cáº£n IPC Ï†(d) â†’ +âˆž', gx+18, gy-gh-8);
+      ctx.fillText('Khoáº£ng cÃ¡ch d â†’ 0', gx+45, gy+16);
+      ctx.strokeStyle = '#ec4899'; ctx.lineWidth = 2.5; ctx.beginPath();
+      for (let i=1; i<=100; i++) {
+        const d=i/100, val=d<0.45 ? Math.pow((0.45-d)/d,1.4)*0.18 : 0;
+        const px=gx+d*gw, py=gy-Math.min(gh-4, val*gh);
+        if (i===1) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      document.getElementById('ccd-readout').textContent = 'Tá»‰ lá»‡ = ' + fraction.toFixed(2) + (proposedX>=wallX ? ' (CCD ÄÃƒ PHANH!)' : ' (An toÃ n)');
+    }
+
+    function f_val(x) { return 0.25*Math.pow(x,4) - 0.9*x*x - 0.25*x + 1.2; }
+    function g_val(x) { return 0.25*Math.pow(x,4) + 1.1*x*x + 1.2; }
+    function h_val(x) { return 2.0*x*x + 0.25*x; }
+    function dh_val(x) { return 4.0*x + 0.25; }
+    function phi_val(x, xk) { return g_val(x) - h_val(xk) - dh_val(xk)*(x - xk); }
+    function solveSubproblem(xk) {
+      const target = dh_val(xk); let x = xk;
+      for (let i=0; i<25; i++) x = x - (x*x*x + 2.2*x - target)/(3*x*x + 2.2);
+      return x;
+    }
+    let dcaHistory = [-1.8];
+    function changeInitX(v) { document.getElementById('dca-init-label').textContent = parseFloat(v).toFixed(1); dcaHistory = [parseFloat(v)]; drawDCA(); }
+    function resetDCA() { dcaHistory = [parseFloat(document.getElementById('dca-init-slider').value)]; drawDCA(); }
+    function stepDCA() { dcaHistory.push(solveSubproblem(dcaHistory[dcaHistory.length-1])); drawDCA(); }
+    function drawDCA() {
+      const c = document.getElementById('dca-canvas'), ctx = c.getContext('2d'), W = c.width, H = c.height;
+      ctx.clearRect(0, 0, W, H);
+      const fg = themeVal('--foreground', '#e2e8f0'), muted = themeVal('--muted-foreground', '#94a3b8');
+      const primary = themeVal('--primary', '#3b82f6'), border = themeVal('--border', '#334155');
+      const xMin=-2.5, xMax=2.5, yMin=-0.2, yMax=3.2;
+      const toX = x => ((x-xMin)/(xMax-xMin))*(W-80)+50, toY = y => H-30-((y-yMin)/(yMax-yMin))*(H-50);
+
+      ctx.strokeStyle = border; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(50, toY(0)); ctx.lineTo(W-30, toY(0)); ctx.moveTo(toX(0), 15); ctx.lineTo(toX(0), H-30); ctx.stroke();
+
+      ctx.strokeStyle = fg; ctx.lineWidth = 2.5; ctx.beginPath();
+      for (let px=0; px<=400; px++) {
+        const x=xMin+(px/400)*(xMax-xMin), y=f_val(x);
+        if (px===0) ctx.moveTo(toX(x), toY(y)); else ctx.lineTo(toX(x), toY(y));
+      }
+      ctx.stroke();
+
+      const xk=dcaHistory[dcaHistory.length-1], xNext=solveSubproblem(xk);
+      ctx.strokeStyle = primary; ctx.lineWidth = 2; ctx.setLineDash([6,4]); ctx.beginPath();
+      let started = false;
+      for (let px=0; px<=400; px++) {
+        const x=xMin+(px/400)*(xMax-xMin), y=phi_val(x, xk);
+        if (y > yMax+0.5) { started = false; continue; }
+        if (!started) { ctx.moveTo(toX(x), toY(y)); started = true; } else ctx.lineTo(toX(x), toY(y));
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+
+      dcaHistory.forEach((pt, idx) => {
+        ctx.fillStyle = idx===dcaHistory.length-1 ? primary : muted;
+        ctx.beginPath(); ctx.arc(toX(pt), toY(f_val(pt)), idx===dcaHistory.length-1 ? 6 : 4, 0, Math.PI*2); ctx.fill();
+      });
+      ctx.strokeStyle = primary; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(toX(xNext), toY(phi_val(xNext, xk)), 5.5, 0, Math.PI*2); ctx.stroke();
+
+      document.getElementById('dca-status').textContent =
+        'k=' + (dcaHistory.length-1) + ' | x_k=' + xk.toFixed(3) + ' â†’ x_{k+1}=' + xNext.toFixed(3);
+    }
+
+    function renderAll() {
+      try { draw3D(); } catch(e){}
+      try { drawAnalogy(); } catch(e){}
+      try { drawSift(); } catch(e){}
+      try { drawSilhouette(); } catch(e){}
+      try { drawVis(); } catch(e){}
+      try { drawCCD(); } catch(e){}
+      try { drawDCA(); } catch(e){}
+    }
+    renderAll();
+    window.addEventListener('themechange', renderAll);
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# Reproducing the verified Windows / Python 3.12 environment.
+numpy==2.5.4
+scipy==1.18.1
+Pillow==13.0.0
+matplotlib==3.11.2
+opencv-python-headless==4.10.0.84
+ipctk==1.6.1
+libigl==2.6.3

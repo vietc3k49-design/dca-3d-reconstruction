@@ -1,0 +1,19 @@
+Both guarded restarts stopped near contact after 58-59 accepted steps, while
+UV RMS remained 2.8 px and dense IoU 85-91%. Reject-only collision handling
+prevents invalid output but does not provide a useful feasible direction.
+
+Use IPC Toolkit's distance barrier and CCD to keep feasible trajectories.
+Normalize contact geometry by RMS radius, including its exact gradient
+pullback; activation gap = 0.02 normalized units. Barrier is divided by gap^4
+to make a dimensionless constraint surrogate; its pixel-unit coefficients
+follow a declared 1, 0.1, 0.01 continuation, 600 steps each. This is a new
+feasibility term, separate from the unchanged shape epsilon 0.001.
+Retain all observed UVs/track IDs, the same neutral state and image axis,
+point tolerance 1 px, camera coefficient 1 and no compactness/category model.
+
+CCD scales the entire proposed step before the gauge normalization. Armijo
+must use the ACTUAL scaled direction, not the original infeasible direction.
+Independent libigl exact-predicate audit includes coplanar intersections.
+Check barrier gradient, similarity invariance and a trajectory whose start
+AND end are disjoint but which passes through a collision in between.
+Report every stage and failure; no global convergence or true 3D accuracy.

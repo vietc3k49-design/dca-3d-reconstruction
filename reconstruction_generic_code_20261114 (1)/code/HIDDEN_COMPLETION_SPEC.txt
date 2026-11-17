@@ -1,0 +1,15 @@
+The three contact-feasible runs still have unobserved protrusions despite
+excellent silhouette fitting. Model-based ray visibility finds 106-107 of
+162 vertices hidden in every input and not used by observed surface anchors.
+
+Controlled optimizer step, NOT a new prior: keep the same cubic field,
+shape epsilon, camera coefficient, contact mu=0.01 and observations. Freeze
+cameras, symmetry frame and all vertices supporting observed feature points;
+optimize only currently hidden unanchored vertices. Reclassify at every
+100-step block; retain the full original objective and CCD/first-hit checks.
+The similarity gauge may move all coordinates but cannot change projections.
+
+Apply to ALL three contact camera-prior cases, 900 steps each. Compare each
+result with its OWN same-objective starting model. Report dense IoU, exact
+intersections, first-hit, C8 residual and depth extents. Never claim this
+model-inferred visibility identifies true unseen geometry or proves uniqueness.

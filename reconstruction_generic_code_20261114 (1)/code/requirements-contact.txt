@@ -1,0 +1,4 @@
+# Optional CPU geometry dependencies, tested with Python 3.12 on Windows.
+# Install in a dedicated environment or isolated --target directory.
+ipctk==1.6.1
+libigl==2.6.3

@@ -1,0 +1,21 @@
+Question: do camera regularization and subpixel point fitting prevent a weak
+shape prior from resolving underconstrained depth?
+
+Predeclared 2x3 design, same code, seed, mesh, 56 tracks and 112 observations:
+  point-observation tolerance: 0 or 1 processed-image pixel;
+  camera prior coefficient: 1, 0.001, or 0 in pixel-error units.
+All cases keep shape epsilon=0.001, no compactness prior, same image-proposed
+fixed axis and C8 default, same iteration budget and first-hit constraints.
+Tolerance 1 is an uncertainty assumption, not a measured confidence interval.
+Point loss is max(||projection-observation|| - tolerance, 0)^2. All tracks
+remain present, including first-hit constraints even inside the tolerance.
+
+Report ALL cases: raw feature RMS/max, dense mask IoU, first-hit feasibility,
+depth/width, transverse moment ratio, sampled C8 residual, camera intrinsics,
+and separate image/shape/camera cost contributions. Objectives differ, so do
+not rank cases by total training cost. No real 3D ground truth is available.
+Test analytic gradients inside/outside the tolerance and the full camera/mesh
+chain. Run fits remotely: primary Xeon first, 3090 fallback only when primary
+job execution is unavailable. Record the actual hostname, not a CPU nickname.
+No per-object geometric template or size. Use one fixed axis from the saved
+image-proposed selection in every case; no new hypothesis selection per case.

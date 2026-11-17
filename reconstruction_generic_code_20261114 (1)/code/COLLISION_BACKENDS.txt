@@ -1,0 +1,20 @@
+Primary-source comparison before adding collision-aware optimization:
+
+IPC Toolkit: barrier energies/analytic derivatives plus continuous collision
+detection (CCD); directly addresses a descent direction approaching contact.
+Python 3.12 Windows wheel verified and installed in isolated G: job/vendor.
+https://github.com/ipc-sim/ipc-toolkit
+
+libigl: Python exact-predicate self-intersection audit, including coplanar
+pairs; useful independent final check, not itself an optimization method.
+Python 3.12 Windows wheel verified and installed alongside IPC.
+https://libigl.github.io/libigl-python-bindings/api/igl_predicates/
+
+CGAL Polygon Mesh Processing: robust self-intersection/mesh-processing
+algorithms, primarily a C++ integration for this pipeline.
+https://doc.cgal.org/latest/Polygon_mesh_processing/group__PkgPolygonMeshProcessingRef.html
+
+Choose IPC barrier + CCD for feasible optimization and libigl for independent
+audits. Preserve the earlier own transverse detector as a cheap diagnostic;
+do not claim that incomplete detector certifies absence of all intersections.
+These are reused established tools, not proposed research contributions.

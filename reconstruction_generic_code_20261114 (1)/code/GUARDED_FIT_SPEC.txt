@@ -1,0 +1,25 @@
+Observed defects, not hypotheses: the six Adam meshes contain 24-510 proper
+nonadjacent transverse triangle crossings. The prior state's mesh also has
+13 crossings. The saved neutral initial_state has zero detected crossings.
+Signed solid moments on a self-intersecting mesh do not certify physical
+mass symmetry. New valid() checks reject transverse crossings and collapsed
+triangles; this partial check does not certify coplanar/adjacent contacts.
+
+Directional diagnosis on camera_0p001_tolerance_1: physical cost 0.0051376611
+px^2, gradient norm 0.060795 in pixel units. Predicted derivative -0.060795,
+but the forward derivative at step 1e-7 is +0.24295; at 1e-11 it approaches
+-0.060799. The discrepancy is in the forward mask-field term, not visibility.
+This is a nearby interpolation kink; finite line search cannot take useful
+gradient steps there. It is NOT an incorrect point-term analytic derivative.
+
+Use cubic B-spline interpolation of the SAME distance field, with analytic
+continuous interior derivatives and the SAME out-of-image penalty. This
+changes the surrogate between pixel samples; retain dense binary-mask IoU
+as the external 2D diagnostic. Preserve bilinear interpolation for controls.
+
+Re-run from cached NEUTRAL state, not the invalid fitted surface. Re-anchor
+all original tracks on that neutral surface by reference-camera rays; do
+not change or discard any observed image coordinate or track. Keep weak
+shape epsilon=0.001, 1-pixel point uncertainty, no compactness, no object
+template. Compare guard+bilinear and guard+cubic with the same state/axis,
+camera coefficient 1, budget 1800. Record all failures and feasibility.

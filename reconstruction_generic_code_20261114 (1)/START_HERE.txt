@@ -1,0 +1,62 @@
+RECONSTRUCTION INVESTIGATION -- 2026-11-14
+
+Open index.html for annotated images, all cases, meshes and quantitative audits.
+This is a failure-analysis result, not proof of correct 3D reconstruction.
+
+Actual execution host: DESKTOP-L6QJ2RK / Tailscale 3090, 100.123.93.72.
+Preferred Xeon 100.100.107.102 desktop is accessible, but SSH job execution
+was unavailable. The authorized 3090 fallback was used. All new large work
+directories are on G:, with no heavy local fitting. Native collision tools
+were installed under the job/vendor directory, not into shared MoGe packages.
+
+Remote root:
+  G:/research_jobs/road_geometry_20261114_contact
+Python:
+  D:/moge/.venv/Scripts/python.exe
+Set PYTHONPATH to the remote root/vendor before using contact-aware code.
+Each job.json / job_state.json / stdout.log / stderr.log preserves host,
+source hashes, arguments, completion status and logs. export_manifest.json
+verifies the downloaded snapshot. code/ is the exact research-run code;
+code_latest/ is the subsequent generic raw-image entry, smoke-tested at
+128 and 384 pixels. These tiny smoke runs test integration, not model quality.
+At 384, the raw images produced 56 automatic pairs / 112 observations.
+
+Raw image command, for any object with suitable foreground masks:
+  python code_latest/reconstruct_images.py --images raw_inputs/view_01.webp raw_inputs/view_02.webp --output NEW_RESULT --point-tolerance-pixels 1 --hidden-completion-steps 900
+The same foreground/feature/free-mesh/camera/IPC pipeline is used for every
+object. No class recognition, star/cylinder template, metric dimensions or
+measured intrinsics were supplied. Use --masks when the automatic background
+separation is unsuitable. requirements-contact.txt lists native optional tools.
+
+Controlled results, all preserved:
+  results/                 contact mode, camera coefficient 1
+  camera_weak/results/     identical contact mode, camera coefficient 0.001
+  camera_zero/results/     identical contact mode, camera coefficient 0
+  hidden_c1/results/       same-objective hidden-block completion of results/
+  hidden_weak/results/     same-objective completion of camera_weak/results/
+  hidden_zero/results/     same-objective completion of camera_zero/results/
+
+The hidden block leaves observed point projections unchanged and never drops
+UVs/tracks. It improves the shape prior but does NOT remove all protrusions.
+For coefficient 0.001, final raw point RMS is 0.710 px, mask IoUs are 98.315%
+and 98.311%, depth/width is 1.4235, C8 surface RMS is 0.2010. There are zero
+libigl intersections and zero first-hit violations. These are fitting and
+validity measurements, not 3D accuracy against the real object.
+
+Earlier complete controlled studies remain alongside this folder:
+  ../axis_ablation_20261114/       six point/camera-prior cases
+  ../optimizer_study_20261114/    matched Adam vs L-BFGS-B continuations
+  ../guarded_fit_20261114/        reject-only guard, bilinear/cubic controls
+
+Established tools reused: IPC Toolkit 1.6.1 for barrier/CCD; libigl 2.6.3
+for exact-predicate intersection audits. Own barrier normalization and
+SO(3)/camera/mesh chains were finite-difference checked. Armijo accounts
+for the actual CCD-scaled step. Legacy diagnostics and outputs are retained.
+
+Limits for the proposed paper: 3D remains visibly wrong in unseen regions;
+no ground truth, metric scale, uniqueness or global-optimality certificate;
+the two web images are not verified as one rigid capture. SIFT/mask fitting
+does not match RGB or establish a visible-surface bijection. Topology is
+fixed to a closed genus-zero mesh. C8 is assumed, not inferred as a fact.
+This is NOT a DCA implementation or a trained neural reconstruction model.
+Do not publish fitting IoU as 3D reconstruction accuracy.

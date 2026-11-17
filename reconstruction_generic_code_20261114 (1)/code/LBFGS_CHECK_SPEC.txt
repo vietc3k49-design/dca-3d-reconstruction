@@ -1,0 +1,14 @@
+Controlled optimizer check after the six-case Adam study:
+keep the exact same objective, shape epsilon, axis, observations and geometry.
+Warm-start each optimizer check from its corresponding saved Adam result.
+Run a matched further 900 Adam steps from each SAME saved state as a control;
+otherwise improvement could merely reflect extra optimization time.
+Use L-BFGS-B with analytic derivatives, bounded focal/principal point, local
+SO(3) exponential charts, pixel-unit objective scaling and at most 900 steps.
+Refresh nearest surface associations every 100 steps, as in the Adam study.
+Report all six cases, objective decrease and termination status. A lower
+objective is not evidence of physically correct geometry or global convergence.
+Do not relabel this as DCA or silently replace the Adam results.
+Compare the physical objective with AL constants removed, and report first-hit
+feasibility separately. Different camera/tolerance cases remain incomparable
+by total objective; within a case, the same-objective optimizer check is valid.
