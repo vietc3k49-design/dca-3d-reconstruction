@@ -49,7 +49,27 @@ def load_images(paths,size=320,mask_paths=None):
     return np.array(images),np.array(masks),transforms
 
 
-def feature_pairs(images,masks):
+def _candidate_pairs(num_views,pair_mode='star',ring_window=2):
+    """Build ordered (view_a, view_b) index pairs for star, ring, or all-pairs matching."""
+    if num_views<=1:return []
+    if pair_mode=='star':
+        return [(0,v) for v in range(1,num_views)]
+    if pair_mode=='all':
+        return [(i,j) for i in range(num_views) for j in range(i+1,num_views)]
+    if pair_mode=='ring':
+        if num_views==2:return [(0,1)]
+        eff_w=min(max(1,int(ring_window)),(num_views-1)//2)
+        items=[]
+        for i in range(num_views):
+            for j in range(i+1,num_views):
+                d=min(j-i,num_views-(j-i))
+                if d<=eff_w:items.append((d,i,j))
+        items.sort()
+        return [(i,j) for _,i,j in items]
+    raise ValueError(f'Unknown pair_mode: {pair_mode}')
+
+
+def feature_pairs(images,masks,pair_mode='star',ring_window=2):
     cv2.setRNGSeed(592)
     sift=cv2.SIFT_create(nfeatures=2500,contrastThreshold=.02)
     keypoints=[];descriptors=[]
@@ -59,14 +79,17 @@ def feature_pairs(images,masks):
             desc=np.sqrt(desc/(np.sum(desc,axis=1,keepdims=True)+1e-12)).astype(np.float32)
         keypoints.append(kp);descriptors.append(desc)
     pairs=[];matcher=cv2.BFMatcher(cv2.NORM_L2)
-    for v in range(1,len(images)):
-        da,db=descriptors[0],descriptors[v]
-        if da is None or db is None:continue
+    cand_pairs=_candidate_pairs(len(images),pair_mode=pair_mode,ring_window=ring_window)
+    for va,vb in cand_pairs:
+        da,db=descriptors[va],descriptors[vb]
+        if da is None or db is None or len(da)<2 or len(db)<2:continue
         forward=matcher.knnMatch(da,db,k=2);backward=matcher.knnMatch(db,da,k=2)
         good_b={x.queryIdx:x.trainIdx for x,y in backward if x.distance<.76*y.distance}
         good=[x for x,y in forward if x.distance<.76*y.distance and good_b.get(x.trainIdx)==x.queryIdx]
         if len(good)<8:continue
-        a=np.array([keypoints[0][m.queryIdx].pt for m in good]);b=np.array([keypoints[v][m.trainIdx].pt for m in good])
+        a=np.array([keypoints[va][m.queryIdx].pt for m in good]);b=np.array([keypoints[vb][m.trainIdx].pt for m in good])
+        if pair_mode!='star':
+            cv2.setRNGSeed(592+va*1000+vb)
         F,inliers=cv2.findFundamentalMat(a,b,cv2.USAC_MAGSAC,1.,.999,10000)
         if F is None or F.shape!=(3,3) or inliers is None:continue
         keep=inliers.ravel().astype(bool)
@@ -79,7 +102,7 @@ def feature_pairs(images,masks):
         selected=np.array(unique,int)
         if len(selected)<8:continue
         H,hi=cv2.findHomography(a,b,cv2.RANSAC,1.5)
-        pairs.append(dict(view_a=0,view_b=v,pixels_a=a[selected],pixels_b=b[selected],F_pixel=F,
+        pairs.append(dict(view_a=va,view_b=vb,pixels_a=a[selected],pixels_b=b[selected],F_pixel=F,
                           raw_matches=len(good),inliers=len(selected),ransac_inlier_detections=int(keep.sum()),
                           homography_inliers=int(hi.sum()) if hi is not None else 0))
-    return pairs,dict(keypoints_per_image=[len(k) for k in keypoints])
+    return pairs,dict(keypoints_per_image=[len(k) for k in keypoints],pair_mode=pair_mode,candidate_pairs=len(cand_pairs))

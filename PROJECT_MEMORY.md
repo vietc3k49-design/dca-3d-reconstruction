@@ -1,6 +1,6 @@
 # Project Memory — Đồ án Tái dựng 3D & Thuật toán DCA (`c:\doan`)
 
-**Cập nhật lần cuối:** 2026-11-17 (Hoàn tất Pha 0 & Pha 1 — Sẵn sàng cho Pha 2)
+**Cập nhật lần cuối:** 2026-11-17 (Hoàn tất Pha 0, Pha 1 & Pha 2 — Sẵn sàng cho Pha 3)
 
 ---
 
@@ -14,15 +14,21 @@
 ---
 
 ## 2. Trạng thái Codebase & Dữ liệu hiện tại
-- **Thư mục mã nguồn đã chuẩn hóa:** `c:\doan\reconstruction_dca_3d` (đã `git mv` từ `reconstruction_generic_code_20261114 (1)`, hiện chưa `git commit`).
-- **Code đã nâng cấp ở Pha 1 (vẫn giữ nguyên mặc định `--optimizer adam` và tương thích 100% với 5/5 test gốc):**
-  - Thêm mới: `code/reconstruction/dca.py`, `code/run_dca_study.py`.
-  - Đã cập nhật: `code/reconstruction/point_terms.py`, `losses.py`, `engine.py`, `contact.py` (`hessian_data`), `axis_completion.py`, `completion.py`, `hidden_completion.py`, `code/reconstruct_images.py` (`--optimizer dca`, `--cauchy-scales`).
+- **Thư mục mã nguồn:** `c:\doan\reconstruction_dca_3d` (đã commit Pha 0 & Pha 1 tại `9e6863e`, tiếp tục commit chốt Pha 2 trên nhánh `main` — working tree sạch, sẵn sàng cho Pha 3).
+- **Code đã nâng cấp ở Pha 1 & Pha 2 (vẫn giữ nguyên mặc định `--optimizer adam` và `star` mode tương thích 100% với 6/6 test):**
+  - Thêm mới: `code/reconstruction/dca.py`, `code/run_dca_study.py`, `code/check_ring_init.py`.
+  - Đã cập nhật ở Pha 1: `code/reconstruction/point_terms.py`, `losses.py`, `engine.py`, `contact.py` (`hessian_data`), `axis_completion.py`, `completion.py`, `hidden_completion.py`, `code/reconstruct_images.py` (`--optimizer dca`, `--cauchy-scales`).
+  - Đã cập nhật ở Pha 2:
+    - `code/reconstruction/inputs.py`: `_candidate_pairs` + `feature_pairs(..., pair_mode='ring'|'all'|'star', ring_window=2)` ghép vòng tròn lân cận + seed RANSAC từng cặp.
+    - `code/reconstruction/initialization.py`: `initialize(..., init_mode='ring', ring_direction='auto')` lan truyền pose theo đồ thị cạnh SIFT (Prim/BFS nối tiếp, lọc trung vị tỷ lệ baseline), tự nhận diện chiều quay vòng tròn (`_ring_sign_from_calibrated`), lấp các góc thiếu bằng `_place_ring_cameras` theo tỷ lệ chiều cao mask, và bổ sung giả thuyết `uniform_ring_*` trong `camera_hypotheses`.
+    - `code/reconstruction/engine.py` & `records.py`: `_build_feature_tracks` gộp track đa góc nhìn qua Union-Find không xung đột view và neo `ray_anchors` theo camera quan sát `v_ref` của từng track (không cứng hóa view 0).
+    - `code/reconstruction/rotations.py` & `code/reconstruct_images.py`: thêm `--init-ring`, `--match-mode`, `--ring-window`, `--ring-direction`, vẽ `feature_matches.png` cho >2 ảnh, và thêm `up=(0., 0., 1.)` cho `look_at` khi xuất `model_views.png` (fix góc `90°/270°` bị xoay ngang).
 - **Thư mục kết quả thực nghiệm đã lưu (`c:\doan\outputs\`):**
   - `baseline_raw_inputs/` (Baseline 1 Adam trên `raw_inputs/`)
   - `baseline_chicken_3views/` (Baseline 2 Adam trên 3 ảnh mặt trước con gà)
   - `dca_study/` (đối chứng `dca_study.json` + ảnh so sánh `Adam vs L-BFGS-B vs Joint DCA` sạch & bơm 25% outlier)
   - `dca_chicken_3views/` (`Joint DCA + Homotopy` trên 3 ảnh mặt trước con gà)
+  - `dca_chicken_12views_ring/` (Pha 2: `Joint DCA + --init-ring` trên đủ 12 ảnh 360° `ga_den_ngu`, `361.9s`)
 - **Môi trường Python đã dựng xong (Pha 0):**
   - Virtualenv: `c:\doan\.venv` (Python `3.12.13` qua `uv`).
   - Đã cài đủ 15 gói theo `code/requirements-reconstruction.txt`: `numpy==2.5.4`, `scipy==1.18.1`, `pillow==13.0.0`, `matplotlib==3.11.2`, `opencv-python-headless==4.10.0.84`, `ipctk==1.6.1`, `libigl==2.6.3`.
@@ -80,8 +86,13 @@
     - `raw_inputs` **bơm 25% outlier SIFT (45–95 px)** + IPC: `Adam` vọt sai số điểm sạch lên **`5.428 px`** (`IoU 95.47%`), trong khi **`Joint DCA` giữ nguyên `cleanRMS = 0.973 px` (`IoU 97.57%`)** — chính xác hơn **5.6x**.
   - **Kết quả trên 3 ảnh mặt trước con gà (`c:\doan\outputs\dca_chicken_3views`, `120.2s`):**
     - Mask IoU tăng từ `75.58% / 82.34% / 81.27%` (Baseline 2 Adam) lên **`94.14% / 93.73% / 94.44%`** (**+14.37% IoU**), `out = 0.431 px`, `in = 0.226 px`, `median = 1.185 px`, **`fraction_within_3px = 92.59%`** (25/27 obs, 2 outlier bị hạ trọng số xuống `0.0006`), `visibility_violations = 0`, `intersecting_pairs = 0`.
-- **Bước tiếp theo — Pha 2:**
-  - Nâng cấp ghép SIFT vòng tròn 360° (`inputs.py`, `initialization.py`) + nhánh khởi tạo vòng tròn `--init-ring` cho 12 ảnh con gà (và sẵn sàng cho 8–12 ảnh lon bò húc khi có dữ liệu).
-- **Các Pha sau:**
-  - **Pha 3:** Subdivide đa phân giải (`162 → 642 → 2562` đỉnh), mở đa luồng `ipctk`, lọc AABB trong `losses.py`.
+- **Pha 2 (ĐÃ HOÀN TẤT 100%):**
+  - Đã nâng cấp ghép SIFT vòng tròn 360° (`inputs.py`), lan truyền pose theo đồ thị cạnh + lấp vòng tròn 360° (`initialization.py`), gộp track Union-Find + neo `ray_anchors` đa góc nhìn (`engine.py`, `records.py`), và CLI `--init-ring` (`reconstruct_images.py`).
+  - **Kiểm thử Pha 2:** 5/5 test gốc PASS + `check_ring_init.py` PASS (lan truyền vòng tròn 8 góc `step=45.0 deg`, 18 track chỉ ở mặt sau, sai số FD gradient `1.28e-09`, và fallback `uniform_ring`).
+  - **Kết quả thực nghiệm đủ 12 ảnh 360° con gà (`c:\doan\outputs\dca_chicken_12views_ring`, `361.9s`):**
+    - 12 camera trải đều 360° (`azim = 0.0° .. 336.7°`), **Mask IoU trung bình `90.47%`** (`88.26% – 93.94%`), `out = 1.203 px`, `in = 0.617 px`, `median_reprojection = 0.611 px`, **`fraction_within_3px = 91.67%`**, `visibility_violations = 0`, `intersecting_pairs = 0` (`libigl`), `signed_to_hull_volume_ratio = 0.318` (khối 3D kín `0.60 × 0.64 × 1.00`, hết sụp mặt sau như bản 3 góc).
+    - **Ghi chú kỹ thuật chuyển sang Pha 3:** Ở mức `162` đỉnh và `smooth_weight = 6.78e-10` (sau `/width^2` trong `weak_priors.py`), bề mặt còn nhiều nếp gợn đa giác thô và `contact_pairs = 72` — đây là đúng hạng mục Pha 3 (`subdivide 162 → 642 → 2562`, tăng mẫu biên mask, lọc AABB `losses.py`, đa luồng `ipctk`, và tinh chỉnh `smooth_weight`).
+- **Bước tiếp theo — Pha 3:**
+  - Subdivide đa phân giải (`162 → 642 → 2562` đỉnh), mở đa luồng `ipctk`, lọc AABB 2D trong `losses.py` (+ `dca.py`), tăng mật độ mẫu biên mask trong `engine.py`, và tinh chỉnh `smooth_weight`.
+- **Pha sau:**
   - **Pha 4:** Viết `texture.py` (bake màu RGB lên `.obj`/`.glb`) và chuẩn hóa kích thước thật (`--reference-height-mm`).

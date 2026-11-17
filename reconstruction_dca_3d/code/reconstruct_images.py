@@ -89,13 +89,13 @@ def save_report(root,images,masks,transforms,pairs,feature_info,init_info,initia
     root=Path(root);root.mkdir(parents=True,exist_ok=True)
     state=result['state'];before,bf,bimages=metrics(initial,a);after,af,renders=metrics(state,a)
     model,frame=display_frame(state);export_mesh(root/'reconstruction',model,a['faces'])
-    F=a['faces'];C=np.array([1.,-1.,np.sqrt(2.)]);g=look_at(C,np.zeros(3))
+    F=a['faces'];C=np.array([1.,-1.,np.sqrt(2.)]);g=look_at(C,np.zeros(3),up=(0.,0.,1.))
     render(model,F,C,g,1000,(1024,1024)).save(root/'model_45deg_2units.png')
     from reconstruction.raster import render_mesh
     turns=[]
     for j,angle in enumerate([0,90,180,270]):
         theta=np.radians(angle);C=np.array([2*np.sin(theta),-2*np.cos(theta),.65])
-        im=render_mesh(model,F,C,look_at(C,np.zeros(3)),900,[512,512],(1024,1024))
+        im=render_mesh(model,F,C,look_at(C,np.zeros(3),up=(0.,0.,1.)),900,[512,512],(1024,1024))
         im.save(root/f'view_{angle:03d}.png');turns.append(im)
     for v,(image,mask,reproj) in enumerate(zip(images,masks,renders)):
         Image.fromarray(image).save(root/f'input_{v+1:02d}.png')
@@ -117,16 +117,31 @@ def save_report(root,images,masks,transforms,pairs,feature_info,init_info,initia
     for ax,im,angle in zip(axs,turns,[0,90,180,270]):ax.imshow(im);ax.set_title(f'Góc xem {angle}°');ax.axis('off')
     fig.tight_layout();fig.savefig(root/'model_views.png',dpi=135);plt.close(fig)
     # Show data-derived feature correspondences, not simulated/hand-labeled IDs.
-    fig,ax=plt.subplots(figsize=(12,6))
     if len(images)==2:
+        fig,ax=plt.subplots(figsize=(12,6))
         canvas=np.concatenate([images[0],images[1]],axis=1);ax.imshow(canvas)
         rng=np.random.default_rng(11)
         for pair in pairs:
             for p,q in zip(pair['pixels_a'],pair['pixels_b']):
                 color=rng.uniform(.1,.9,3);ax.plot([p[0],q[0]+a['width']],[p[1],q[1]],color=color,lw=.6,alpha=.65)
         ax.set_title(f'Điểm tương ứng tự động: {sum(p["inliers"] for p in pairs)} cặp sau lọc hình học');ax.axis('off')
-        fig.tight_layout();fig.savefig(root/'feature_matches.png',dpi=150)
-    plt.close(fig)
+        fig.tight_layout();fig.savefig(root/'feature_matches.png',dpi=150);plt.close(fig)
+    elif pairs:
+        shown=sorted(pairs,key=lambda p:-p['inliers'])[:4]
+        fig,axs=plt.subplots(len(shown),1,figsize=(10,4.5*len(shown)),squeeze=False)
+        rng=np.random.default_rng(11)
+        for row,pair in enumerate(shown):
+            va,vb=int(pair.get('view_a',0)),int(pair['view_b'])
+            canvas=np.concatenate([images[va],images[vb]],axis=1);ax=axs[row,0];ax.imshow(canvas)
+            for p,q in zip(pair['pixels_a'],pair['pixels_b']):
+                color=rng.uniform(.1,.9,3);ax.plot([p[0],q[0]+a['width']],[p[1],q[1]],color=color,lw=.7,alpha=.75)
+            ax.set_title(f'Cặp ảnh {va+1} ↔ {vb+1}: {pair["inliers"]} điểm tương ứng sau lọc hình học');ax.axis('off')
+        fig.tight_layout();fig.savefig(root/'feature_matches.png',dpi=140);plt.close(fig)
+    else:
+        fig,ax=plt.subplots(figsize=(8,2.5))
+        ax.text(.5,.5,'Không có cặp ảnh nào đạt >= 8 SIFT inliers; tái dựng bằng ràng buộc đường bao đa góc nhìn.',
+                ha='center',va='center',fontsize=11)
+        ax.axis('off');fig.tight_layout();fig.savefig(root/'feature_matches.png',dpi=120);plt.close(fig)
     impl_label=('free mesh, Joint DCA + Cauchy IRLS, image-proposed fixed-axis C8 or alternative compact completion'
                 if a.get('cauchy_scale_pixels') is not None else
                 'free mesh, Armijo descent, image-proposed fixed-axis C8 or alternative compact completion')
@@ -214,22 +229,33 @@ def main():
     p.add_argument('--hidden-completion-steps',type=int,default=0,help='Optional same-cost completion of model-hidden unanchored geometry after accepted axis fitting.')
     p.add_argument('--completion-steps',type=int,default=None)
     p.add_argument('--data-budget-pixels',type=float,default=1.)
+    p.add_argument('--init-ring',action='store_true',help='Enable 360-degree ring feature matching and circular camera initialization.')
+    p.add_argument('--match-mode',choices=('auto','star','ring','all'),default='auto',
+                   help='Feature pair graph topology (auto selects ring when --init-ring is set, else star).')
+    p.add_argument('--ring-window',type=int,default=2,help='Circular neighbor step window for ring feature matching.')
+    p.add_argument('--ring-direction',choices=('auto','ccw','cw'),default='auto',
+                   help='Camera orbit direction around -g[0,1] for circular initialization.')
     args=p.parse_args();args.output.mkdir(exist_ok=True,parents=True)
     if args.coarse_steps is None:args.coarse_steps=90 if args.optimizer=='dca' else 650
     if args.steps is None:args.steps=180 if args.optimizer=='dca' else 1600
     if args.axis_steps is None:args.axis_steps=120 if args.optimizer=='dca' else 900
     if args.completion_steps is None:args.completion_steps=120 if args.optimizer=='dca' else 750
-    if args.size<128 or min(args.coarse_steps,args.steps,args.completion_steps,args.axis_steps)<1 or min(args.prior_weight,args.compactness_pixels,args.calibration_prior_pixels,args.data_budget_pixels,args.point_tolerance_pixels)<0:
-        p.error('size>=128, positive iteration counts and nonnegative prior weight required.')
+    if args.size<128 or args.ring_window<1 or min(args.coarse_steps,args.steps,args.completion_steps,args.axis_steps)<1 or min(args.prior_weight,args.compactness_pixels,args.calibration_prior_pixels,args.data_budget_pixels,args.point_tolerance_pixels)<0:
+        p.error('size>=128, ring_window>=1, positive iteration counts and nonnegative prior weight required.')
     if args.optimizer=='dca' and (not args.cauchy_scales or min(args.cauchy_scales)<=0):
         p.error('Positive --cauchy-scales required for DCA.')
     if args.masks and len(args.masks)!=len(args.images):p.error('One mask per image required.')
+    init_mode='ring' if args.init_ring else 'star'
+    pair_mode=('ring' if args.init_ring else 'star') if args.match_mode=='auto' else args.match_mode
     images,masks,transforms=load_images(args.images,args.size,args.masks)
-    pairs,feature_info=feature_pairs(images,masks)
-    print('Image features:',feature_info,'inlier pairs:',[p['inliers'] for p in pairs],flush=True)
-    state,faces,init_info=initialize(images,masks,pairs);state['h']=np.eye(3)
+    pairs,feature_info=feature_pairs(images,masks,pair_mode=pair_mode,ring_window=args.ring_window)
+    print('Image features:',feature_info,'inlier pairs:',[(p.get('view_a',0),p['view_b'],p['inliers']) for p in pairs],flush=True)
+    state,faces,init_info=initialize(images,masks,pairs,init_mode=init_mode,ring_direction=args.ring_direction);state['h']=np.eye(3)
     start=time.perf_counter();coarse_faces=faces
-    starts=camera_hypotheses(state) if args.camera_starts=='multiple' else [('feature_calibration',state)]
+    starts=(camera_hypotheses(state,images=images,masks=masks,init_mode=init_mode,
+                              ring_direction=args.ring_direction,
+                              ring_direction_detected=bool(init_info.get('ring_direction_detected')))
+            if args.camera_starts=='multiple' else [('feature_calibration',state)])
     fitted=[];search=[]
     use_dca=(args.optimizer=='dca')
     solve_fn=optimize_dca if use_dca else optimize

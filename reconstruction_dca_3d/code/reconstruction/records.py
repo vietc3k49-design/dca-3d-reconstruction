@@ -16,10 +16,10 @@ def read_case(source):
     uv=np.array(obs['pixels_normalized'],float).reshape(-1,2);pairs=[];width=images.shape[1]
     for view in range(1,len(images)):
         ref={i:q for i,q in zip(ids[ci==0],uv[ci==0])}
-        values=[(ref[i],q) for i,q in zip(ids[ci==view],uv[ci==view])]
+        values=[(ref[i],q) for i,q in zip(ids[ci==view],uv[ci==view]) if i in ref]
         if values:
             aa,bb=np.array(values).transpose(1,0,2)
-            pairs.append(dict(view_b=view,inliers=len(aa),pixels_a=(aa+.5)*width,pixels_b=(bb+.5)*width))
+            pairs.append(dict(view_a=0,view_b=view,inliers=len(aa),pixels_a=(aa+.5)*width,pixels_b=(bb+.5)*width))
     a=arrays(images,masks,pairs,state,np.array(p['faces'],int))
     a.update(ci=ci,pi=ids,uv=uv,anchor_vertices=np.array(obs['anchor_vertices'],int).reshape(-1,3),
              anchor_bary=np.array(obs['anchor_bary'],float).reshape(-1,3))

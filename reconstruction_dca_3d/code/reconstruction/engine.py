@@ -9,6 +9,45 @@ from .rotations import exp_rotation
 from .point_terms import reprojection_term,cauchy_irls_weights
 
 
+def _build_feature_tracks(pairs):
+    """Merge pairwise matches across arbitrary views into conflict-free multi-view tracks."""
+    parent={};comp_views={};comp_order={};raw_xy={}
+    def find(node):
+        while parent[node]!=node:
+            parent[node]=parent[parent[node]]
+            node=parent[node]
+        return node
+    def ensure(view,xy):
+        key=(view,round(float(xy[0]),2),round(float(xy[1]),2))
+        if key not in parent:
+            parent[key]=key;comp_views[key]={view};comp_order[key]=len(comp_order);raw_xy[key]=np.asarray(xy,float)
+        return key
+    for pair in pairs:
+        va=int(pair.get('view_a',0));vb=int(pair['view_b'])
+        if va==vb:continue
+        for a,b in zip(pair['pixels_a'],pair['pixels_b']):
+            ka=ensure(va,a);kb=ensure(vb,b)
+            ra,rb=find(ka),find(kb)
+            if ra!=rb and comp_views[ra].isdisjoint(comp_views[rb]):
+                if comp_order[rb]<comp_order[ra]:ra,rb=rb,ra
+                parent[rb]=ra;comp_views[ra]|=comp_views[rb]
+    groups={}
+    for key in raw_xy:
+        root=find(key)
+        groups.setdefault(root,[]).append((key[0],raw_xy[key]))
+    tracks=[]
+    for obs in groups.values():
+        if len(obs)<2:continue
+        obs.sort(key=lambda item:item[0])
+        tracks.append(obs)
+    observations=[];anchors=[]
+    for tid,obs in enumerate(tracks):
+        anchors.append(obs[0])
+        for view,xy in obs:
+            observations.append((view,tid,xy))
+    return observations,anchors
+
+
 def arrays(images,masks,pairs,s,faces):
     K,size=images.shape[:2];rng=np.random.default_rng(592);fields=[];targets=[]
     for mask in masks:
@@ -18,17 +57,17 @@ def arrays(images,masks,pairs,s,faces):
             yy,xx=np.nonzero(region);take=rng.choice(len(xx),n,replace=len(xx)<n)
             picks.append(np.column_stack([xx[take]+.5,yy[take]+.5]))
         targets.append((np.vstack(picks)-size/2)/size)
-    tracks={};observations=[];observed=set()
-    for pair in pairs:
-        for a,b in zip(pair['pixels_a'],pair['pixels_b']):
-            key=tuple(np.round(a,2))
-            if key not in tracks:
-                tracks[key]=len(tracks);observations.append((0,tracks[key],a))
-            identity=(pair['view_b'],tracks[key])
-            if identity not in observed:
-                observations.append((pair['view_b'],tracks[key],b));observed.add(identity)
-    first=np.array(list(tracks),float).reshape(-1,2)/size-.5
-    anchor_face,bary=ray_anchors(s['X'],faces,s['C'][0],s['g'][0],np.exp(s['lf'][0]),s['pp'][0],first)
+    observations,anchors=_build_feature_tracks(pairs)
+    n_tracks=len(anchors)
+    anchor_face=np.empty(n_tracks,int);bary=np.empty((n_tracks,3),float)
+    by_view={}
+    for tid,(v_ref,xy_ref) in enumerate(anchors):
+        by_view.setdefault(v_ref,[]).append((tid,xy_ref))
+    for v_ref,items in by_view.items():
+        tids=np.array([t for t,_ in items],int)
+        pix=np.array([xy for _,xy in items],float).reshape(-1,2)/size-.5
+        af,ab=ray_anchors(s['X'],faces,s['C'][v_ref],s['g'][v_ref],np.exp(s['lf'][v_ref]),s['pp'][v_ref],pix)
+        anchor_face[tids]=af;bary[tids]=ab
     return dict(k=K,width=size,height=1.,faces=faces,fields=np.array(fields),targets=np.array(targets),
                 masks=masks,pixel_tolerance=1/size,bary=np.array([[1,0,0],[0,1,0],[0,0,1],[.5,.5,0],[0,.5,.5],[.5,0,.5],[1/3]*3]),
                 ci=np.array([o[0] for o in observations],int),pi=np.array([o[1] for o in observations],int),
