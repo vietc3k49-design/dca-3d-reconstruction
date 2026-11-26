@@ -1,0 +1,13 @@
+{
+  "nvrtc_ptx_bytes": 705490,
+  "num_gaussians": 48,
+  "num_groups": 25,
+  "num_pairs_26var": 23,
+  "num_singletons_13var": 2,
+  "max_directional_grad_rel_err_pct": 0.5676,
+  "max_gpu_qp_kkt_residual": 1.098903862553426e-12,
+  "max_cpu_qp_kkt_residual": 1.0989043095322946e-12,
+  "max_cpu_vs_gpu_fp32_step_diff": 0.0,
+  "elapsed_s": 9.624,
+  "all_checks_passed": true
+}

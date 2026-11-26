@@ -1,0 +1,19 @@
+# Python & OS caches
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Browser persistent cache & temporary COLMAP / 3DGS workspaces
+_browser_cache/
+**/database.db
+**/database.db-shm
+**/database.db-wal
+**/clean_colmap_scene/
+**/gs_out/
+**/logs/
+**/*.bin

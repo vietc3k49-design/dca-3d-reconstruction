@@ -1,0 +1,53 @@
+{
+  "stage": "Stage 3A: Unified Paper 2 + Paper 3 Photometric DCA Surface-Splatting",
+  "raw_ply": "results_showcase/eastern_swordsman_multiscale36_dca\\gs_out\\multiscale36_splats_4400.ply",
+  "dca_ply": "results_showcase/eastern_swordsman_multiscale36_dca\\gs_out\\multiscale36_dca_surfels.ply",
+  "splats_before": 280000,
+  "splats_after_visual_hull_prune": 272117,
+  "floaters_removed": 7883,
+  "paper3_dca_stats": {
+    "outer_dca_iters": 8,
+    "dc_identity_err": 0.0,
+    "energy_init": 732784.6303909866,
+    "energy_final": 463797.50850546564,
+    "energy_drop_pct": 36.71,
+    "monotonic_descent_verified": true,
+    "crease_edges_count": 608531,
+    "crease_edges_pct": 51.47,
+    "smooth_region_normal_jitter_deg_before": 21.006,
+    "smooth_region_normal_jitter_deg_after": 0.858,
+    "crease_region_dihedral_deg_before": 66.856,
+    "crease_region_dihedral_deg_after": 65.077,
+    "mean_pos_shift_mm": 0.1631
+  },
+  "energy_trace": [
+    732784.6303909866,
+    515690.18452199997,
+    480123.20073107193,
+    471216.3670920599,
+    467791.38771965256,
+    466094.80605529615,
+    465138.62049435,
+    464341.64022442844,
+    463797.50850546564
+  ],
+  "eval_1024px_36views_before": {
+    "mean_psnr_db": 35.722,
+    "fullbody_20_psnr_db": 35.433,
+    "closeup_16_psnr_db": 36.084,
+    "mean_bbox_psnr_db": 33.204,
+    "mean_alpha_iou": 0.989,
+    "mean_tenengrad_pred": 0.134681,
+    "tenengrad_ratio_vs_gt": 0.9579
+  },
+  "eval_1024px_36views_after_dca": {
+    "mean_psnr_db": 35.364,
+    "fullbody_20_psnr_db": 35.108,
+    "closeup_16_psnr_db": 35.684,
+    "mean_bbox_psnr_db": 32.846,
+    "mean_alpha_iou": 0.98691,
+    "mean_tenengrad_pred": 0.133515,
+    "tenengrad_ratio_vs_gt": 0.9496
+  },
+  "elapsed_s": 26.17
+}

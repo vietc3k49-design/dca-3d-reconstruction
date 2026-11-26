@@ -1,0 +1,27 @@
+{
+  "pipeline": "Multi-Scale 36-View (1536x1536 RGBA) Stage 1 (Paper 1) + Stage 2 (Paper 2)",
+  "stage1": {
+    "registered_images": "36/36",
+    "clean_points3D_track_ge_3": 3323,
+    "fx_est_px": 3643.4899,
+    "fx_gt_1536_px": 3635.8783,
+    "focal_error_pct": 0.2093,
+    "stage1a_rot_mean_deg": 0.10067,
+    "stage1b_rot_mean_deg": 0.06827,
+    "stage1b_cam_rmse_mm": 0.0,
+    "reproj_mean_px_before": 0.7825,
+    "reproj_mean_px_after": 0.7313,
+    "stage1a_colmap_s": 17.165,
+    "stage1b_dca_internal_s": 0.1597,
+    "stage1b_dca_wall_s": 0.366,
+    "dca_steps_reused": "46/62"
+  },
+  "stage2": {
+    "stage2_brush_s": 466.82,
+    "total_steps": 4400,
+    "ply_path": "results_showcase/eastern_swordsman_multiscale36_dca\\gs_out\\multiscale36_splats_4400.ply",
+    "ply_splats": 280000,
+    "ply_mb": 66.08
+  },
+  "total_stage12_s": 485.76
+}
